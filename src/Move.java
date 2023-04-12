@@ -1,13 +1,13 @@
 import java.awt.Point;
 
-public class Move {
+public abstract class Move {
 
-	public final Piece movedPiece;
-	public final Point startCoordinate;
-	public final Point destinationCoordiante;
-	public final ChessBoard board;
+	protected final Piece movedPiece;
+	protected final Point startCoordinate;
+	protected final Point destinationCoordiante;
+	protected final ChessBoard board;
 	
-	public Move(final Piece movedPiece, 
+	private Move(final Piece movedPiece, 
 				final Point startCoordinate, 
 				final Point destinationCoordinate, 
 				final ChessBoard board) {
@@ -17,6 +17,37 @@ public class Move {
 		this.board = board;		
 	}
 	
+	public abstract void makeMove();
 	
+	
+	public class QuietMove extends Move {
+
+		public QuietMove(Piece movedPiece, Point startCoordinate, Point destinationCoordinate, ChessBoard board) {
+			super(movedPiece, startCoordinate, destinationCoordinate, board);
+			// TODO Auto-generated constructor stub
+		}
+
+		@Override
+		public void makeMove() {
+			this.movedPiece.coordinate.setLocation(destinationCoordiante);			
+		}
+		
+	}
+	
+	public class AttackMove extends Move {
+		
+		
+		public AttackMove(Piece movedPiece, Point startCoordinate, Point destinationCoordinate, ChessBoard board) {
+			super(movedPiece, startCoordinate, destinationCoordinate, board);
+			// TODO Auto-generated constructor stub
+		}
+
+		@Override
+		public void makeMove() {
+			// TODO Auto-generated method stub
+			this.movedPiece.coordinate.setLocation(destinationCoordiante);	
+		}
+		
+	}
 	
 }
