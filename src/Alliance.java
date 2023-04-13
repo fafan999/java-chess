@@ -1,4 +1,4 @@
 
 public enum Alliance {
-	WHITE,BLACK;
+	WHITE, BLACK;
 }
