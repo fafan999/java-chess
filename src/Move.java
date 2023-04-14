@@ -27,6 +27,7 @@ public abstract class Move {
 		@Override
 		public void makeMove() {
 			this.movedPiece.coordinate.setLocation(destinationCoordiante);
+			this.board.setRealPosition(this.movedPiece);
 		}
 
 	}
@@ -46,6 +47,7 @@ public abstract class Move {
 		public void makeMove() {
 			this.board.allPieces.remove(this.attackedPiece);
 			this.movedPiece.coordinate.setLocation(destinationCoordiante);
+			this.board.setRealPosition(this.movedPiece);
 		}
 
 	}

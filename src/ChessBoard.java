@@ -30,7 +30,7 @@ public class ChessBoard extends JPanel {
 		// get the images of the pieces ---------------------------------
 		try {
 //			BufferedImage all = ImageIO.read(new File("chess.png")); 			
-			BufferedImage all = ImageIO.read(new File("chess_leonardoAI_2.png"));
+			BufferedImage all = ImageIO.read(new File("chess_set_SZB.png"));
 			int index = 0;
 			for (int y = 0; y < 400; y += 200) {
 				for (int x = 0; x < 1200; x += 200) {
@@ -174,6 +174,10 @@ public class ChessBoard extends JPanel {
 			legalMoves.clear();
 		}
 		return legalMoves;
+	}
+
+	public ArrayList<Point> getPieceMoves(Piece selectedPiece) {
+		return selectedPiece.getPossibleMoves();
 	}
 
 	public void validateMove(Piece selectedPiece, Point newCoordinate) {
