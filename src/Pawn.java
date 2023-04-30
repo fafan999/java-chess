@@ -10,8 +10,8 @@ public class Pawn extends Piece {
 	}
 
 	@Override
-	public ArrayList<Point> getPossibleMoves() {
-		ArrayList<Point> possibleMoves = new ArrayList<Point>();
+	public ArrayList<Move> getPossibleMoves() {
+		ArrayList<Move> possibleMoves = new ArrayList<Move>();
 		Piece firstOtherPiece;
 		Piece secondOtherPiece;
 		Point checkPoint = (Point) this.coordinate.clone();
@@ -23,7 +23,7 @@ public class Pawn extends Piece {
 		firstOtherPiece = board.getPiece(checkPoint);
 		if (ChessBoard.isOnBoard(checkPoint)) {
 			if (firstOtherPiece == null) {
-				possibleMoves.add((Point) checkPoint.clone());
+				possibleMoves.add(new Move.QuietMove(this, this.coordinate, (Point) checkPoint.clone(), this.board));
 			}
 		}
 
@@ -32,7 +32,7 @@ public class Pawn extends Piece {
 		secondOtherPiece = board.getPiece(checkPoint);
 		if (ChessBoard.isOnBoard(checkPoint)) {
 			if (coordinate.y == startingRank && firstOtherPiece == null && secondOtherPiece == null) {
-				possibleMoves.add((Point) checkPoint.clone());
+				possibleMoves.add(new Move.QuietMove(this, this.coordinate, (Point) checkPoint.clone(), this.board));
 				board.doublePawnPushSquare = new Point((Point) checkPoint.clone());
 			}
 		}
@@ -44,13 +44,13 @@ public class Pawn extends Piece {
 			Piece otherPiece = board.getPiece(p);
 			if (otherPiece != null) {
 				if (otherPiece.side != this.side) {
-					possibleMoves.add(p);
+					possibleMoves.add(new Move.AttackMove(this, this.coordinate, p, this.board, otherPiece));
 				}
 			}
 			// capture enPassant
 			if (board.enPassantSquare != null) {
 				if (p.equals(board.enPassantSquare)) {
-					possibleMoves.add(p);
+					possibleMoves.add(new Move.AttackMove(this, this.coordinate, p, this.board, otherPiece));
 				}
 			}
 		}

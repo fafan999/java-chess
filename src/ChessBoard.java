@@ -130,7 +130,8 @@ public class ChessBoard extends JPanel {
 			white = !white; // new row starts with different color
 		}
 		g.setColor(new Color(0, 160, 0, 150));
-		for (Point p : legalMoves()) {
+		for (Move m : legalMoves()) {
+			Point p = m.getDestinationCoordiante();
 			if (getPiece(p) == null) {
 				g.fillOval(p.x * SIZE_OF_SQUARE + SIZE_OF_SQUARE / 3, (7 - p.y) * SIZE_OF_SQUARE + SIZE_OF_SQUARE / 3,
 						SIZE_OF_SQUARE / 3, SIZE_OF_SQUARE / 3);
@@ -166,8 +167,8 @@ public class ChessBoard extends JPanel {
 
 	}
 
-	public ArrayList<Point> legalMoves() {
-		ArrayList<Point> legalMoves = new ArrayList<Point>();
+	public ArrayList<Move> legalMoves() {
+		ArrayList<Move> legalMoves = new ArrayList<Move>();
 		if (selectedPiece != null) {
 			legalMoves = selectedPiece.getPossibleMoves();
 		} else {
@@ -176,7 +177,7 @@ public class ChessBoard extends JPanel {
 		return legalMoves;
 	}
 
-	public ArrayList<Point> getPieceMoves(Piece selectedPiece) {
+	public ArrayList<Move> getPieceMoves(Piece selectedPiece) {
 		return selectedPiece.getPossibleMoves();
 	}
 
@@ -185,11 +186,18 @@ public class ChessBoard extends JPanel {
 //		if (selectedPiece.isWhite != sideToMove) {
 //			return;
 //		}		
-		ArrayList<Point> pieceMoves = selectedPiece.getPossibleMoves();
+		ArrayList<Move> pieceMoves = selectedPiece.getPossibleMoves();
+		Move newMove = null;
+		// get the new move corresponding to the new coordinate
+		for (Move p : pieceMoves) {
+			if (p.destinationCoordiante.equals(newCoordinate))
+				newMove = p;
+		}
 
-		if (pieceMoves.contains(newCoordinate)) {
-			selectedPiece.move(newCoordinate);
-
+//		if (pieceMoves.contains(newCoordinate)) {
+//			selectedPiece.move(newCoordinate);
+		if (newMove != null) {
+			newMove.makeMove();
 			// check if there can be en passant move in the next move
 			if (this.doublePawnPushSquare != null) {
 				if (this.doublePawnPushSquare.equals(newCoordinate)) {
@@ -203,11 +211,17 @@ public class ChessBoard extends JPanel {
 
 			this.sideToMove = this.sideToMove == Alliance.WHITE ? Alliance.BLACK : Alliance.WHITE; // the next turn
 
-		} else {
+		} else
+
+		{
 			setRealPosition(selectedPiece);
 			System.out.println("The " + selectedPiece + " can't move to " + newCoordinate + ".");
 		}
 
+	}
+
+	public boolean containsCoordinate(final ArrayList<Move> pieceMoves, final Point coordinate) {
+		return pieceMoves.stream().filter(o -> o.getDestinationCoordiante().equals(coordinate)).findFirst().isPresent();
 	}
 
 	/**
@@ -266,7 +280,7 @@ public class ChessBoard extends JPanel {
 	 * @param coordinate
 	 * @param pieceType  The type of the piece
 	 */
-	public void createNewPiece(Point coordinate, char pieceType) {
+	private void createNewPiece(Point coordinate, char pieceType) {
 		final Alliance side;
 		if (Character.isUpperCase(pieceType)) {
 			side = Alliance.WHITE;

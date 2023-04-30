@@ -10,8 +10,8 @@ public class Queen extends Piece {
 	}
 
 	@Override
-	public ArrayList<Point> getPossibleMoves() {
-		ArrayList<Point> possibleMoves = new ArrayList<Point>();
+	public ArrayList<Move> getPossibleMoves() {
+		ArrayList<Move> possibleMoves = new ArrayList<Move>();
 		Point checkPoint;
 
 		// BISHOP
@@ -24,11 +24,13 @@ public class Queen extends Piece {
 				if (otherPiece.side == side) {
 					break; // if same color, then return
 				} else {
-					possibleMoves.add((Point) checkPoint.clone()); // if different color, then add and return
+					// if different color, then add and return
+					possibleMoves.add(
+							new Move.AttackMove(this, this.coordinate, (Point) checkPoint.clone(), board, otherPiece));
 					break;
 				}
 			}
-			possibleMoves.add((Point) checkPoint.clone());
+			possibleMoves.add(new Move.QuietMove(this, this.coordinate, (Point) checkPoint.clone(), this.board));
 			checkPoint.translate(-1, 1);
 		}
 
@@ -41,11 +43,13 @@ public class Queen extends Piece {
 				if (otherPiece.side == side) {
 					break; // if same color, then return
 				} else {
-					possibleMoves.add((Point) checkPoint.clone()); // if different color, then add and return
+					// if different color, then add and return
+					possibleMoves.add(
+							new Move.AttackMove(this, this.coordinate, (Point) checkPoint.clone(), board, otherPiece));
 					break;
 				}
 			}
-			possibleMoves.add((Point) checkPoint.clone());
+			possibleMoves.add(new Move.QuietMove(this, this.coordinate, (Point) checkPoint.clone(), this.board));
 			checkPoint.translate(1, 1);
 		}
 
@@ -58,11 +62,13 @@ public class Queen extends Piece {
 				if (otherPiece.side == side) {
 					break; // if same color, then return
 				} else {
-					possibleMoves.add((Point) checkPoint.clone()); // if different color, then add and return
+					// if different color, then add and return
+					possibleMoves.add(
+							new Move.AttackMove(this, this.coordinate, (Point) checkPoint.clone(), board, otherPiece));
 					break;
 				}
 			}
-			possibleMoves.add((Point) checkPoint.clone());
+			possibleMoves.add(new Move.QuietMove(this, this.coordinate, (Point) checkPoint.clone(), this.board));
 			checkPoint.translate(-1, -1);
 		}
 
@@ -75,11 +81,13 @@ public class Queen extends Piece {
 				if (otherPiece.side == side) {
 					break; // if same color, then return
 				} else {
-					possibleMoves.add((Point) checkPoint.clone()); // if different color, then add and return
+					// if different color, then add and return
+					possibleMoves.add(
+							new Move.AttackMove(this, this.coordinate, (Point) checkPoint.clone(), board, otherPiece));
 					break;
 				}
 			}
-			possibleMoves.add((Point) checkPoint.clone());
+			possibleMoves.add(new Move.QuietMove(this, this.coordinate, (Point) checkPoint.clone(), this.board));
 			checkPoint.translate(1, -1);
 		}
 
@@ -93,11 +101,13 @@ public class Queen extends Piece {
 				if (otherPiece.side == side) {
 					break; // if same color, then return
 				} else {
-					possibleMoves.add((Point) checkPoint.clone()); // if different color, then add and return
+					// if different color, then add and return
+					possibleMoves.add(
+							new Move.AttackMove(this, this.coordinate, (Point) checkPoint.clone(), board, otherPiece));
 					break;
 				}
 			}
-			possibleMoves.add((Point) checkPoint.clone());
+			possibleMoves.add(new Move.QuietMove(this, this.coordinate, (Point) checkPoint.clone(), this.board));
 			checkPoint.translate(0, 1);
 		}
 
@@ -110,11 +120,13 @@ public class Queen extends Piece {
 				if (otherPiece.side == side) {
 					break; // if same color, then return
 				} else {
-					possibleMoves.add((Point) checkPoint.clone()); // if different color, then add and return
+					// if different color, then add and return
+					possibleMoves.add(
+							new Move.AttackMove(this, this.coordinate, (Point) checkPoint.clone(), board, otherPiece));
 					break;
 				}
 			}
-			possibleMoves.add((Point) checkPoint.clone());
+			possibleMoves.add(new Move.QuietMove(this, this.coordinate, (Point) checkPoint.clone(), this.board));
 			checkPoint.translate(0, -1);
 		}
 
@@ -127,11 +139,13 @@ public class Queen extends Piece {
 				if (otherPiece.side == side) {
 					break; // if same color, then return
 				} else {
-					possibleMoves.add((Point) checkPoint.clone()); // if different color, then add and return
+					// if different color, then add and return
+					possibleMoves.add(
+							new Move.AttackMove(this, this.coordinate, (Point) checkPoint.clone(), board, otherPiece));
 					break;
 				}
 			}
-			possibleMoves.add((Point) checkPoint.clone());
+			possibleMoves.add(new Move.QuietMove(this, this.coordinate, (Point) checkPoint.clone(), this.board));
 			checkPoint.translate(-1, 0);
 		}
 
@@ -144,11 +158,13 @@ public class Queen extends Piece {
 				if (otherPiece.side == side) {
 					break; // if same color, then return
 				} else {
-					possibleMoves.add((Point) checkPoint.clone()); // if different color, then add and return
+					// if different color, then add and return
+					possibleMoves.add(
+							new Move.AttackMove(this, this.coordinate, (Point) checkPoint.clone(), board, otherPiece));
 					break;
 				}
 			}
-			possibleMoves.add((Point) checkPoint.clone());
+			possibleMoves.add(new Move.QuietMove(this, this.coordinate, (Point) checkPoint.clone(), this.board));
 			checkPoint.translate(1, 0);
 		}
 

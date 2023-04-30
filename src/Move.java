@@ -15,9 +15,13 @@ public abstract class Move {
 		this.board = board;
 	}
 
+	public Point getDestinationCoordiante() {
+		return destinationCoordiante;
+	}
+
 	public abstract void makeMove();
 
-	public class QuietMove extends Move {
+	public static final class QuietMove extends Move {
 
 		public QuietMove(Piece movedPiece, Point startCoordinate, Point destinationCoordinate, ChessBoard board) {
 			super(movedPiece, startCoordinate, destinationCoordinate, board);
@@ -32,7 +36,7 @@ public abstract class Move {
 
 	}
 
-	public class AttackMove extends Move {
+	public static final class AttackMove extends Move {
 
 		private final Piece attackedPiece;
 

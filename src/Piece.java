@@ -21,28 +21,7 @@ public abstract class Piece {
 		board.allPieces.add(this); // add the piece position to the positions list
 	}
 
-	public abstract ArrayList<Point> getPossibleMoves();
-
-	public void move(Point newCoordinate) {
-		// take the other piece if it is on this coordinate
-		Piece otherPiece = board.getPiece(newCoordinate);
-		if (otherPiece != null) {
-			otherPiece.take();
-		}
-
-		// remove the piece if en passant move
-		if (this.name.equals("pawn")) {
-			int direction = (this.side == Alliance.WHITE) ? 1 : -1;
-			if (newCoordinate.equals(board.enPassantSquare)) {
-				board.allPieces.remove(
-						board.getPiece(new Point(board.enPassantSquare.x, board.enPassantSquare.y - direction)));
-			}
-		}
-
-		// moving the piece to the new position
-		this.coordinate.setLocation(newCoordinate);
-		board.setRealPosition(this);
-	}
+	public abstract ArrayList<Move> getPossibleMoves();
 
 	public void take() {
 		board.allPieces.remove(this);

@@ -12,8 +12,8 @@ public class Knight extends Piece {
 	}
 
 	@Override
-	public ArrayList<Point> getPossibleMoves() {
-		ArrayList<Point> possibleMoves = new ArrayList<Point>();
+	public ArrayList<Move> getPossibleMoves() {
+		ArrayList<Move> possibleMoves = new ArrayList<Move>();
 		Point checkPoint;
 
 		for (Point p : ALL_SQUARES) {
@@ -23,10 +23,13 @@ public class Knight extends Piece {
 				Piece otherPiece = board.getPiece(checkPoint);
 				if (otherPiece != null) {
 					if (otherPiece.side != this.side) {
-						possibleMoves.add(checkPoint); // If it's not the same color
+						// If it's not the same color
+						possibleMoves
+								.add(new Move.AttackMove(this, this.coordinate, checkPoint, this.board, otherPiece));
 					}
 				} else {
-					possibleMoves.add(checkPoint); // If there isn't any piece
+					// If there isn't any piece
+					possibleMoves.add(new Move.QuietMove(this, this.coordinate, checkPoint, board));
 				}
 			}
 		}
