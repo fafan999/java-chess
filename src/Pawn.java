@@ -21,7 +21,7 @@ public class Pawn extends Piece {
 		// move one square forward
 		checkPoint.translate(0, direction);
 		firstOtherPiece = board.getPiece(checkPoint);
-		if (ChessBoard.isOnBoard(checkPoint)) {
+		if (isOnBoard(checkPoint)) {
 			if (firstOtherPiece == null) {
 				possibleMoves.add(new Move.QuietMove(this, this.coordinate, (Point) checkPoint.clone(), this.board));
 			}
@@ -30,7 +30,7 @@ public class Pawn extends Piece {
 		// move two squares forward
 		checkPoint.translate(0, direction);
 		secondOtherPiece = board.getPiece(checkPoint);
-		if (ChessBoard.isOnBoard(checkPoint)) {
+		if (isOnBoard(checkPoint)) {
 			if (coordinate.y == startingRank && firstOtherPiece == null && secondOtherPiece == null) {
 				possibleMoves.add(new Move.QuietMove(this, this.coordinate, (Point) checkPoint.clone(), this.board));
 				board.doublePawnPushSquare = new Point((Point) checkPoint.clone());

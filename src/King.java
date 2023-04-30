@@ -19,7 +19,7 @@ public class King extends Piece {
 		for (Point p : allSquares) {
 			checkPoint = (Point) this.coordinate.clone();
 			checkPoint.translate(p.x, p.y);
-			if (ChessBoard.isOnBoard(checkPoint)) {
+			if (isOnBoard(checkPoint)) {
 				Piece otherPiece = board.getPiece(checkPoint);
 				if (otherPiece != null) {
 					if (otherPiece.side != this.side) {

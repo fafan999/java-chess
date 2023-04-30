@@ -38,4 +38,12 @@ public abstract class Piece {
 		return file + (coordinate.y + 1);
 	}
 
+	public static final boolean isOnBoard(Point coordinate) {
+		if (0 <= coordinate.x && coordinate.x <= 7 && 0 <= coordinate.y && coordinate.y <= 7) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 }
