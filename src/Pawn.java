@@ -1,10 +1,11 @@
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Pawn extends Piece {
 
-	public Pawn(Point coordinate, Alliance side, ChessBoard board) {
-		super(coordinate, side, board);
+	public Pawn(Point coordinate, Alliance side, LinkedList<Piece> allPieces) {
+		super(coordinate, side, allPieces);
 		this.name = "pawn";
 		this.index += 5;
 	}
@@ -15,44 +16,42 @@ public class Pawn extends Piece {
 		Piece firstOtherPiece;
 		Piece secondOtherPiece;
 		Point checkPoint = (Point) this.coordinate.clone();
-		int direction = Alliance.WHITE == side ? 1 : -1;
-		int startingRank = Alliance.WHITE == side ? 1 : 6;
+		int direction = this.side.getDirection();
+		int startingRank = this.side.getStartingRank();
 
 		// move one square forward
 		checkPoint.translate(0, direction);
-		firstOtherPiece = board.getPiece(checkPoint);
+		firstOtherPiece = Piece.getPiece(checkPoint, this.allPieces);
 		if (isOnBoard(checkPoint)) {
 			if (firstOtherPiece == null) {
-				possibleMoves.add(new Move.QuietMove(this, this.coordinate, (Point) checkPoint.clone(), this.board));
+				possibleMoves
+						.add(new Move.QuietMove(this, (Point) this.coordinate.clone(), (Point) checkPoint.clone()));
 			}
 		}
 
-		// move two squares forward
+		// move two squares forward (double pawn push)
 		checkPoint.translate(0, direction);
-		secondOtherPiece = board.getPiece(checkPoint);
-		if (isOnBoard(checkPoint)) {
-			if (coordinate.y == startingRank && firstOtherPiece == null && secondOtherPiece == null) {
-				possibleMoves.add(new Move.QuietMove(this, this.coordinate, (Point) checkPoint.clone(), this.board));
-				board.doublePawnPushSquare = new Point((Point) checkPoint.clone());
-			}
+		secondOtherPiece = Piece.getPiece(checkPoint, this.allPieces);
+		if (coordinate.y == startingRank && firstOtherPiece == null && secondOtherPiece == null) {
+			possibleMoves
+					.add(new Move.DoublePawnPush(this, (Point) this.coordinate.clone(), (Point) checkPoint.clone()));
 		}
 
 		// capture diagonally
 		Point[] capturingSquares = { new Point(coordinate.x + 1, coordinate.y + direction),
 				new Point(coordinate.x - 1, coordinate.y + direction) };
 		for (Point p : capturingSquares) {
-			Piece otherPiece = board.getPiece(p);
+			Piece otherPiece = Piece.getPiece(p, this.allPieces);
 			if (otherPiece != null) {
 				if (otherPiece.side != this.side) {
-					possibleMoves.add(new Move.AttackMove(this, this.coordinate, p, this.board, otherPiece));
+					possibleMoves.add(new Move.AttackMove(this, (Point) this.coordinate.clone(), p, otherPiece));
 				}
 			}
 			// capture enPassant
-			if (board.enPassantSquare != null) {
-				if (p.equals(board.enPassantSquare)) {
-					possibleMoves.add(new Move.AttackMove(this, this.coordinate, p, this.board, otherPiece));
-				}
-			}
+//			if (p.equals(board.enPassantSquare)) {
+//				otherPiece = this.board.getPiece(new Point(p.x, p.y - direction));
+//				possibleMoves.add(new Move.AttackMove(this, this.coordinate, p, otherPiece));
+//			}
 		}
 		return possibleMoves;
 	}

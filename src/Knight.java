@@ -1,12 +1,13 @@
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Knight extends Piece {
 	private static final Point[] ALL_SQUARES = { new Point(2, 1), new Point(2, -1), new Point(-2, 1), new Point(-2, -1),
 			new Point(1, 2), new Point(-1, 2), new Point(1, -2), new Point(-1, -2) };
 
-	public Knight(Point coordinate, Alliance side, ChessBoard board) {
-		super(coordinate, side, board);
+	public Knight(Point coordinate, Alliance side, LinkedList<Piece> allPieces) {
+		super(coordinate, side, allPieces);
 		this.name = "knight";
 		this.index += 3;
 	}
@@ -20,16 +21,17 @@ public class Knight extends Piece {
 			checkPoint = (Point) this.coordinate.clone();
 			checkPoint.translate(p.x, p.y);
 			if (isOnBoard(checkPoint)) {
-				Piece otherPiece = board.getPiece(checkPoint);
+				Piece otherPiece = Piece.getPiece(checkPoint, allPieces);
 				if (otherPiece != null) {
 					if (otherPiece.side != this.side) {
 						// If it's not the same color
-						possibleMoves
-								.add(new Move.AttackMove(this, this.coordinate, checkPoint, this.board, otherPiece));
+						possibleMoves.add(new Move.AttackMove(this, (Point) this.coordinate.clone(),
+								(Point) checkPoint.clone(), otherPiece));
 					}
 				} else {
 					// If there isn't any piece
-					possibleMoves.add(new Move.QuietMove(this, this.coordinate, checkPoint, board));
+					possibleMoves
+							.add(new Move.QuietMove(this, (Point) this.coordinate.clone(), (Point) checkPoint.clone()));
 				}
 			}
 		}

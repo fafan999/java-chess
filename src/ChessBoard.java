@@ -15,32 +15,31 @@ import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class ChessBoard extends JPanel {
+	public static final int SIZE_OF_SQUARE = 64; // determine how big the board is
 	private static Image[] pieceImages = new Image[12];
 	private Piece selectedPiece = null;
+	public ArrayList<Move> selectedPieceLegalMoves = new ArrayList<Move>(); // legal moves list of the selectedPiece
 	public LinkedList<Piece> allPieces = new LinkedList<>(); // list for tracking the pieces
-	public final int SIZE_OF_SQUARE; // determine how big the board is
 	private Alliance sideToMove = Alliance.WHITE; // white starts
-	public Point doublePawnPushSquare = null; // if it's a double pawn push
 	public Point enPassantSquare = null; // en passant square
 
-	public ChessBoard(int SIZE_OF_SQUARE) {
+	public ChessBoard() {
 		super();
-		this.SIZE_OF_SQUARE = SIZE_OF_SQUARE;
 		positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR "); // initial position
 		// get the images of the pieces ---------------------------------
 		try {
 //			BufferedImage all = ImageIO.read(new File("chess.png")); 			
-			BufferedImage all = ImageIO.read(new File("chess_set_SZB.png"));
+			BufferedImage allPictures = ImageIO.read(new File("chess_set_SZB.png"));
 			int index = 0;
 			for (int y = 0; y < 400; y += 200) {
 				for (int x = 0; x < 1200; x += 200) {
-					pieceImages[index] = all.getSubimage(x, y, 200, 200).getScaledInstance(SIZE_OF_SQUARE,
+					pieceImages[index] = allPictures.getSubimage(x, y, 200, 200).getScaledInstance(SIZE_OF_SQUARE,
 							SIZE_OF_SQUARE, BufferedImage.SCALE_SMOOTH);
 					index++;
 				}
 			}
 		} catch (Exception e) {
-			System.err.println("Nem sikerült a bábuk képének beolvasása");
+			System.err.println("Failed to load the pictures of the pieces");
 		} // -------------------------------------------------------------
 
 		addMouseListener(new MouseListener() {
@@ -53,12 +52,15 @@ public class ChessBoard extends JPanel {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				selectedPiece = getPiece(new Point(e.getX() / SIZE_OF_SQUARE, 7 - e.getY() / SIZE_OF_SQUARE));
+				selectedPiece = Piece.getPiece(new Point(e.getX() / SIZE_OF_SQUARE, 7 - e.getY() / SIZE_OF_SQUARE),
+						allPieces);
 				if (selectedPiece != null) {
-					allPieces.remove(selectedPiece);
-					allPieces.addLast(selectedPiece); // put it at the last so it is at the top
-					if (selectedPiece.side != sideToMove) {
+					if (!(selectedPiece.side.equals(sideToMove))) {
 						selectedPiece = null; // check which side turn it is
+					} else {
+						setLegalMoves(selectedPiece);
+						allPieces.remove(selectedPiece);
+						allPieces.addLast(selectedPiece); // put it at the last so it is at the top
 					}
 				}
 				repaint();
@@ -71,6 +73,8 @@ public class ChessBoard extends JPanel {
 					validateMove(selectedPiece, new Point(e.getX() / SIZE_OF_SQUARE, 7 - e.getY() / SIZE_OF_SQUARE));
 //					System.out.println(selectedPiece.coordinate.toString());
 					System.out.println(selectedPiece);
+//					System.out.println("Is in check:" + isInCheck(Alliance.BLACK));
+					Piece.isInCheck(Alliance.BLACK, allPieces);
 					selectedPiece = null;
 					repaint();
 				}
@@ -130,9 +134,9 @@ public class ChessBoard extends JPanel {
 			white = !white; // new row starts with different color
 		}
 		g.setColor(new Color(0, 160, 0, 150));
-		for (Move m : legalMoves()) {
-			Point p = m.getDestinationCoordiante();
-			if (getPiece(p) == null) {
+		for (Move m : this.selectedPieceLegalMoves) {
+			Point p = m.destinationCoordiante;
+			if (Piece.getPiece(p, allPieces) == null) {
 				g.fillOval(p.x * SIZE_OF_SQUARE + SIZE_OF_SQUARE / 3, (7 - p.y) * SIZE_OF_SQUARE + SIZE_OF_SQUARE / 3,
 						SIZE_OF_SQUARE / 3, SIZE_OF_SQUARE / 3);
 			} else {
@@ -167,86 +171,62 @@ public class ChessBoard extends JPanel {
 
 	}
 
-	public ArrayList<Move> legalMoves() {
-		ArrayList<Move> legalMoves = new ArrayList<Move>();
+	public void setLegalMoves(Piece selectedPiece) {
+		ArrayList<Move> illegalMoves = new ArrayList<Move>();
 		if (selectedPiece != null) {
-			legalMoves = selectedPiece.getPossibleMoves();
+			this.selectedPieceLegalMoves = selectedPiece.getPossibleMoves();
+			for (Move m : this.selectedPieceLegalMoves) {
+				// make the move
+				m.makeMove();
+				// check if our king is in check
+				if (Piece.isInCheck(m.movedPiece.side, m.allPieces)) {
+					// add to the illegal moves
+					illegalMoves.add(m);
+				}
+				// reset the move
+				m.resetMove();
+			}
+			for (Move m : illegalMoves) {
+				// remove the illegal moves
+				selectedPieceLegalMoves.remove(m);
+			}
 		} else {
-			legalMoves.clear();
+			this.selectedPieceLegalMoves.clear();
 		}
-		return legalMoves;
+		System.out.println("set legal moves");
 	}
 
-	public ArrayList<Move> getPieceMoves(Piece selectedPiece) {
-		return selectedPiece.getPossibleMoves();
-	}
+//	public ArrayList<Move> getPieceMoves(Piece selectedPiece) {
+//		return selectedPiece.getPossibleMoves();
+//	}
 
 	public void validateMove(Piece selectedPiece, Point newCoordinate) {
 		// check which side turn it is
 //		if (selectedPiece.isWhite != sideToMove) {
 //			return;
 //		}		
-		ArrayList<Move> pieceMoves = selectedPiece.getPossibleMoves();
+//		ArrayList<Move> pieceMoves = selectedPiece.getPossibleMoves();
 		Move newMove = null;
 		// get the new move corresponding to the new coordinate
-		for (Move p : pieceMoves) {
+		for (Move p : this.selectedPieceLegalMoves) {
 			if (p.destinationCoordiante.equals(newCoordinate))
 				newMove = p;
 		}
-
-//		if (pieceMoves.contains(newCoordinate)) {
-//			selectedPiece.move(newCoordinate);
 		if (newMove != null) {
-			newMove.makeMove();
 			// check if there can be en passant move in the next move
-			if (this.doublePawnPushSquare != null) {
-				if (this.doublePawnPushSquare.equals(newCoordinate)) {
-					int direction = selectedPiece.side == Alliance.WHITE ? 1 : -1;
-					this.enPassantSquare = new Point(newCoordinate.x, newCoordinate.y - direction);
-				} else {
-					this.enPassantSquare = null;
-					this.doublePawnPushSquare = null;
-				}
+			if (newMove instanceof Move.DoublePawnPush) {
+				int direction = selectedPiece.side.getDirection();
+				this.enPassantSquare = new Point(newMove.destinationCoordiante.x,
+						newMove.destinationCoordiante.y - direction);
+			} else {
+				this.enPassantSquare = null;
 			}
-
-			this.sideToMove = this.sideToMove == Alliance.WHITE ? Alliance.BLACK : Alliance.WHITE; // the next turn
-
-		} else
-
-		{
-			setRealPosition(selectedPiece);
+			newMove.makeMove();
+			this.sideToMove = this.sideToMove.getOppositeSide(); // the next turn
+		} else {
+			selectedPiece.setRealPosition();
 			System.out.println("The " + selectedPiece + " can't move to " + newCoordinate + ".");
 		}
-
-	}
-
-	public boolean containsCoordinate(final ArrayList<Move> pieceMoves, final Point coordinate) {
-		return pieceMoves.stream().filter(o -> o.getDestinationCoordiante().equals(coordinate)).findFirst().isPresent();
-	}
-
-	/**
-	 * Get the piece by coordinate
-	 * 
-	 * @param coordinate
-	 * @return
-	 */
-	public Piece getPiece(Point coordinate) {
-		for (Piece p : allPieces) {
-			if (p.coordinate.equals(coordinate)) {
-				return p;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Set the piece position by coordinate
-	 * 
-	 * @param p
-	 */
-	public void setRealPosition(Piece p) {
-		p.xRealPosition = p.coordinate.x * SIZE_OF_SQUARE;
-		p.yRealPosition = (7 - p.coordinate.y) * SIZE_OF_SQUARE; // we count rank from bottom of the table
 	}
 
 	/**
@@ -267,20 +247,21 @@ public class ChessBoard extends JPanel {
 				if (Character.isDigit(c)) {
 					file += Character.digit(c, 10);
 				} else {
-					createNewPiece(new Point(file, rank), c);
+					createNewPiece(new Point(file, rank), c, this.allPieces);
 					file++;
 				}
 			}
 			rank--; // step to the next rank
 		}
-
 	}
 
 	/**
+	 * Crate a new piece at the given coordinate
+	 * 
 	 * @param coordinate
 	 * @param pieceType  The type of the piece
 	 */
-	private void createNewPiece(Point coordinate, char pieceType) {
+	public static void createNewPiece(Point coordinate, char pieceType, LinkedList<Piece> allPieces) {
 		final Alliance side;
 		if (Character.isUpperCase(pieceType)) {
 			side = Alliance.WHITE;
@@ -290,32 +271,23 @@ public class ChessBoard extends JPanel {
 
 		switch (String.valueOf(pieceType).toLowerCase()) {
 		case "p":
-			new Pawn(coordinate, side, this);
+			new Pawn(coordinate, side, allPieces);
 			break;
 		case "r":
-			new Rook(coordinate, side, this);
+			new Rook(coordinate, side, allPieces);
 			break;
 		case "n":
-			new Knight(coordinate, side, this);
+			new Knight(coordinate, side, allPieces);
 			break;
 		case "b":
-			new Bishop(coordinate, side, this);
+			new Bishop(coordinate, side, allPieces);
 			break;
 		case "q":
-			new Queen(coordinate, side, this);
+			new Queen(coordinate, side, allPieces);
 			break;
 		case "k":
-			new King(coordinate, side, this);
+			new King(coordinate, side, allPieces);
 			break;
 		}
 	}
-
-//	public static final boolean isOnBoard(Point coordinate) {
-//		if (0 <= coordinate.x && coordinate.x <= 7 && 0 <= coordinate.y && coordinate.y <= 7) {
-//			return true;
-//		} else {
-//			return false;
-//		}
-//	}
-
 }

@@ -1,58 +1,129 @@
 import java.awt.Point;
+import java.util.LinkedList;
 
 public abstract class Move {
 
-	protected final Piece movedPiece;
-	protected final Point startCoordinate;
-	protected final Point destinationCoordiante;
-	protected final ChessBoard board;
+	final Piece movedPiece;
+	final Point startCoordinate;
+	final Point destinationCoordiante;
+	final LinkedList<Piece> allPieces;
+	boolean isValid;
 
-	private Move(final Piece movedPiece, final Point startCoordinate, final Point destinationCoordinate,
-			final ChessBoard board) {
+	private Move(final Piece movedPiece, final Point startCoordinate, final Point destinationCoordinate) {
 		this.movedPiece = movedPiece;
 		this.startCoordinate = startCoordinate;
 		this.destinationCoordiante = destinationCoordinate;
-		this.board = board;
+		this.allPieces = movedPiece.allPieces;
 	}
 
-	public Point getDestinationCoordiante() {
-		return destinationCoordiante;
-	}
-
+	/**
+	 * Execute this move on the board
+	 */
 	public abstract void makeMove();
+
+	public abstract void resetMove();
+
+//	public abstract boolean leavesKingInCheck();
 
 	public static final class QuietMove extends Move {
 
-		public QuietMove(Piece movedPiece, Point startCoordinate, Point destinationCoordinate, ChessBoard board) {
-			super(movedPiece, startCoordinate, destinationCoordinate, board);
-			// TODO Auto-generated constructor stub
+		public QuietMove(Piece movedPiece, Point startCoordinate, Point destinationCoordinate) {
+			super(movedPiece, startCoordinate, destinationCoordinate);
 		}
 
 		@Override
 		public void makeMove() {
-			this.movedPiece.coordinate.setLocation(destinationCoordiante);
-			this.board.setRealPosition(this.movedPiece);
+			this.movedPiece.coordinate.setLocation(this.destinationCoordiante);
+			this.movedPiece.setRealPosition();
+		}
+
+		@Override
+		public void resetMove() {
+			this.movedPiece.coordinate.setLocation(this.startCoordinate);
+			this.movedPiece.setRealPosition();
 		}
 
 	}
 
+	/**
+	 * Handling the moves resulting in capture
+	 * 
+	 * @author superpc
+	 */
 	public static final class AttackMove extends Move {
 
 		private final Piece attackedPiece;
 
-		public AttackMove(Piece movedPiece, Point startCoordinate, Point destinationCoordinate, ChessBoard board,
-				Piece attackedPiece) {
-			super(movedPiece, startCoordinate, destinationCoordinate, board);
+		public AttackMove(Piece movedPiece, Point startCoordinate, Point destinationCoordinate, Piece attackedPiece) {
+			super(movedPiece, startCoordinate, destinationCoordinate);
 			this.attackedPiece = attackedPiece;
-			// TODO Auto-generated constructor stub
 		}
 
 		@Override
 		public void makeMove() {
-			this.board.allPieces.remove(this.attackedPiece);
-			this.movedPiece.coordinate.setLocation(destinationCoordiante);
-			this.board.setRealPosition(this.movedPiece);
+			this.attackedPiece.take();
+			this.movedPiece.coordinate.setLocation(this.destinationCoordiante);
+			this.movedPiece.setRealPosition();
 		}
+
+		@Override
+		public void resetMove() {
+			this.movedPiece.allPieces.add(attackedPiece);
+			this.movedPiece.coordinate.setLocation(this.startCoordinate);
+			this.movedPiece.setRealPosition();
+		}
+
+//		@Override
+//		public boolean leavesKingInCheck() {
+//			boolean isValid;
+//			this.makeMove();
+//			if (Piece.isInCheck(movedPiece.side, movedPiece.allPieces)) {
+//				isValid = false;
+//			} else {
+//				isValid = true;
+//			}
+//			this.resetMove();
+//			return isValid;
+//		}
+
+	}
+
+	/**
+	 * Handling the double pawn push moves
+	 * 
+	 * @author superpc
+	 *
+	 */
+	public static final class DoublePawnPush extends Move {
+
+		public DoublePawnPush(Piece movedPiece, Point startCoordinate, Point destinationCoordinate) {
+			super(movedPiece, startCoordinate, destinationCoordinate);
+		}
+
+		@Override
+		public void makeMove() {
+			this.movedPiece.coordinate.setLocation(this.destinationCoordiante);
+			this.movedPiece.setRealPosition();
+		}
+
+		@Override
+		public void resetMove() {
+			this.movedPiece.coordinate.setLocation(this.startCoordinate);
+			this.movedPiece.setRealPosition();
+		}
+
+//		@Override
+//		public boolean leavesKingInCheck() {
+//			boolean isValid;
+//			this.makeMove();
+//			if (Piece.isInCheck(movedPiece.side, movedPiece.allPieces)) {
+//				isValid = false;
+//			} else {
+//				isValid = true;
+//			}
+//			this.resetMove();
+//			return isValid;
+//		}
 
 	}
 

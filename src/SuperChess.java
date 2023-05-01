@@ -10,9 +10,9 @@ public class SuperChess {
 //		JPanel chessBoardContainer = new JPanel();
 //		chessBoardContainer.setBounds(100, 100, 512, 512);
 
-		ChessBoard chessBoard = new ChessBoard(64);
+		ChessBoard chessBoard = new ChessBoard();
 
-		chessBoard.setBounds(20, 20, chessBoard.SIZE_OF_SQUARE * 8, chessBoard.SIZE_OF_SQUARE * 8);
+		chessBoard.setBounds(20, 20, ChessBoard.SIZE_OF_SQUARE * 8, ChessBoard.SIZE_OF_SQUARE * 8);
 
 		mainFrame.setSize(600, 600); // resize the window (first)
 		mainFrame.setLocationRelativeTo(null); // center the window (second)

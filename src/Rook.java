@@ -1,10 +1,11 @@
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Rook extends Piece {
 
-	public Rook(Point coordinate, Alliance side, ChessBoard board) {
-		super(coordinate, side, board);
+	public Rook(Point coordinate, Alliance side, LinkedList<Piece> allPieces) {
+		super(coordinate, side, allPieces);
 		this.name = "rook";
 		this.index += 4; // index of the Rook images
 	}
@@ -22,18 +23,18 @@ public class Rook extends Piece {
 		checkPoint = (Point) this.coordinate.clone();
 		checkPoint.translate(translateX, translateY);
 		while (isOnBoard(checkPoint)) {
-			Piece otherPiece = board.getPiece(checkPoint);
+			Piece otherPiece = Piece.getPiece(checkPoint, allPieces);
 			if (otherPiece != null) {
 				if (otherPiece.side == side) {
 					break; // if same color, then return
 				} else {
 					// if different color, then add and return
-					possibleMoves.add(
-							new Move.AttackMove(this, this.coordinate, (Point) checkPoint.clone(), board, otherPiece));
+					possibleMoves.add(new Move.AttackMove(this, (Point) this.coordinate.clone(),
+							(Point) checkPoint.clone(), otherPiece));
 					break;
 				}
 			}
-			possibleMoves.add(new Move.QuietMove(this, this.coordinate, (Point) checkPoint.clone(), this.board));
+			possibleMoves.add(new Move.QuietMove(this, (Point) this.coordinate.clone(), (Point) checkPoint.clone()));
 			checkPoint.translate(translateX, translateY);
 		}
 
