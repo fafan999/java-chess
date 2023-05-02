@@ -1,6 +1,5 @@
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public abstract class Piece {
 	public Point coordinate; // position on the chessboard
@@ -9,9 +8,8 @@ public abstract class Piece {
 	protected int index = 0; // index of the white king image (first row)
 	public final Alliance side; // the side the piece belongs to
 	public String name; // type of the piece
-	public LinkedList<Piece> allPieces = new LinkedList<Piece>(); // tracking all the pieces
 
-	public Piece(Point coordinate, Alliance side, LinkedList<Piece> allPieces) {
+	public Piece(Point coordinate, Alliance side) {
 		this.coordinate = coordinate;
 //		board.setRealPosition(this);
 		this.side = side;
@@ -19,16 +17,14 @@ public abstract class Piece {
 			// index of the black king image (second row)
 			this.index += 6;
 		}
-
-		this.allPieces = allPieces;
 		this.setRealPosition();
-		this.allPieces.add(this); // add the piece to the rest of the pieces
+		ChessBoard.allPieces.add(this); // add the piece to the rest of the pieces
 	}
 
 	public abstract ArrayList<Move> getPossibleMoves();
 
 	public void take() {
-		this.allPieces.remove(this);
+		ChessBoard.allPieces.remove(this);
 	}
 
 	@Override
@@ -77,11 +73,10 @@ public abstract class Piece {
 	 * Get the piece by coordinate from the list of pieces
 	 * 
 	 * @param coordinate
-	 * @param allPieces
 	 * @return piece at the given coordinate
 	 */
-	public static Piece getPiece(Point coordinate, LinkedList<Piece> allPieces) {
-		for (Piece p : allPieces) {
+	public static Piece getPiece(Point coordinate) {
+		for (Piece p : ChessBoard.allPieces) {
 			if (p.coordinate.equals(coordinate)) {
 				return p;
 			}
@@ -96,8 +91,8 @@ public abstract class Piece {
 	 * @param allPieces list of the pieces
 	 * @return king of the given side
 	 */
-	public static Piece getKing(Alliance side, LinkedList<Piece> allPieces) {
-		for (Piece p : allPieces) {
+	public static Piece getKing(Alliance side) {
+		for (Piece p : ChessBoard.allPieces) {
 			if (p.side.equals(side) && p instanceof King) {
 				return p;
 			}
@@ -110,12 +105,11 @@ public abstract class Piece {
 	 * Get the pieces of the opponent of the given side from the list of pieces
 	 * 
 	 * @param side
-	 * @param allPieces list of pieces of both players
 	 * @return pieces of the opponent
 	 */
-	public static ArrayList<Piece> getOppositePieces(Alliance side, LinkedList<Piece> allPieces) {
+	public static ArrayList<Piece> getOppositePieces(Alliance side) {
 		ArrayList<Piece> oppositePieces = new ArrayList<Piece>();
-		for (Piece p : allPieces) {
+		for (Piece p : ChessBoard.allPieces) {
 			if (!p.side.equals(side)) {
 				oppositePieces.add(p);
 			}
@@ -127,16 +121,21 @@ public abstract class Piece {
 	 * Check if the king of the given side is in check in the current position
 	 * 
 	 * @param side
-	 * @param allPieces
 	 * @return true if the king is in check, false otherwise
 	 */
-	public static boolean isInCheck(Alliance side, LinkedList<Piece> allPieces) {
-		ArrayList<Piece> oppositePieces = Piece.getOppositePieces(side, allPieces);
-		Piece king = Piece.getKing(side, allPieces);
+	public static boolean isKingInCheck(Alliance side) {
+		Piece king = Piece.getKing(side);
+		if (isCoordinateInCheck(king.side, king.coordinate)) {
+//			System.out.println("The " + side.toString().toLowerCase() + " is in check at " + king.coordinateToString());
+			return true;
+		}
+		return false;
+	}
+
+	public static boolean isCoordinateInCheck(Alliance side, Point coordinate) {
+		ArrayList<Piece> oppositePieces = Piece.getOppositePieces(side);
 		for (Piece p : oppositePieces) {
-			if (Piece.containsCoordinate(p.getPossibleMoves(), king.coordinate)) {
-				System.out.println(
-						"The" + side.toString().toLowerCase() + " is in check at" + king.coordinate.toString());
+			if (Piece.containsCoordinate(p.getPossibleMoves(), coordinate)) {
 				return true;
 			}
 		}

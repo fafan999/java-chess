@@ -1,19 +1,16 @@
 import java.awt.Point;
-import java.util.LinkedList;
 
 public abstract class Move {
 
 	final Piece movedPiece;
 	final Point startCoordinate;
 	final Point destinationCoordiante;
-	final LinkedList<Piece> allPieces;
 	boolean isValid;
 
 	private Move(final Piece movedPiece, final Point startCoordinate, final Point destinationCoordinate) {
 		this.movedPiece = movedPiece;
 		this.startCoordinate = startCoordinate;
 		this.destinationCoordiante = destinationCoordinate;
-		this.allPieces = movedPiece.allPieces;
 	}
 
 	/**
@@ -68,24 +65,10 @@ public abstract class Move {
 
 		@Override
 		public void resetMove() {
-			this.movedPiece.allPieces.add(attackedPiece);
+			ChessBoard.allPieces.add(attackedPiece);
 			this.movedPiece.coordinate.setLocation(this.startCoordinate);
 			this.movedPiece.setRealPosition();
 		}
-
-//		@Override
-//		public boolean leavesKingInCheck() {
-//			boolean isValid;
-//			this.makeMove();
-//			if (Piece.isInCheck(movedPiece.side, movedPiece.allPieces)) {
-//				isValid = false;
-//			} else {
-//				isValid = true;
-//			}
-//			this.resetMove();
-//			return isValid;
-//		}
-
 	}
 
 	/**
@@ -111,20 +94,35 @@ public abstract class Move {
 			this.movedPiece.coordinate.setLocation(this.startCoordinate);
 			this.movedPiece.setRealPosition();
 		}
-
-//		@Override
-//		public boolean leavesKingInCheck() {
-//			boolean isValid;
-//			this.makeMove();
-//			if (Piece.isInCheck(movedPiece.side, movedPiece.allPieces)) {
-//				isValid = false;
-//			} else {
-//				isValid = true;
-//			}
-//			this.resetMove();
-//			return isValid;
-//		}
-
 	}
 
+	public static final class ShortCastleMove extends Move {
+
+		private final Piece rook;
+		private final Point rookStartCoordinate;
+		private final Point rookDestinationCoordinate;
+
+		public ShortCastleMove(Piece movedPiece, Point startCoordinate, Point destinationCoordinate, Piece rook) {
+			super(movedPiece, startCoordinate, destinationCoordinate);
+			this.rook = rook;
+			this.rookStartCoordinate = rook.coordinate;
+			this.rookDestinationCoordinate = new Point(this.destinationCoordiante.x - 1, this.destinationCoordiante.y);
+		}
+
+		@Override
+		public void makeMove() {
+			this.movedPiece.coordinate.setLocation(this.destinationCoordiante);
+			this.movedPiece.setRealPosition();
+			this.rook.coordinate.setLocation(this.rookDestinationCoordinate);
+			this.rook.setRealPosition();
+		}
+
+		@Override
+		public void resetMove() {
+			this.movedPiece.coordinate.setLocation(this.startCoordinate);
+			this.movedPiece.setRealPosition();
+			this.rook.coordinate.setLocation(this.rookStartCoordinate);
+			this.rook.setRealPosition();
+		}
+	}
 }

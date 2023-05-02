@@ -1,13 +1,12 @@
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public class King extends Piece {
 	private static final Point[] ALL_SQUARES = { new Point(1, 0), new Point(1, -1), new Point(1, 1), new Point(-1, 0),
 			new Point(0, 1), new Point(-1, 1), new Point(-1, -1), new Point(0, -1) };
 
-	public King(Point coordinate, Alliance side, LinkedList<Piece> allPieces) {
-		super(coordinate, side, allPieces);
+	public King(Point coordinate, Alliance side) {
+		super(coordinate, side);
 		this.name = "king";
 		this.index += 0;
 	}
@@ -21,7 +20,7 @@ public class King extends Piece {
 			checkPoint = (Point) this.coordinate.clone();
 			checkPoint.translate(p.x, p.y);
 			if (isOnBoard(checkPoint)) {
-				Piece otherPiece = Piece.getPiece(checkPoint, allPieces);
+				Piece otherPiece = Piece.getPiece(checkPoint);
 				if (otherPiece != null) {
 					if (otherPiece.side != this.side) {
 						// If it's not the same color
@@ -36,5 +35,31 @@ public class King extends Piece {
 			}
 		}
 		return possibleMoves;
+	}
+
+	public Move getCastleMoves() {
+		// castle short
+		if (this.side.getShortCastle()) {
+			boolean canCastle = true;
+			int x = this.coordinate.x;
+			int y = this.coordinate.y;
+			Point[] shortCastleSquares = { new Point(x + 1, y), new Point(x + 2, y) };
+			for (Point p : shortCastleSquares) {
+				// if there is a piece between the king and the rook, castle is forbidden
+				// if any of the coordinates is in check, castle is forbidden
+				if (Piece.getPiece(p) != null || Piece.isCoordinateInCheck(this.side, p)
+						|| Piece.isKingInCheck(this.side)) {
+					canCastle = false;
+					break;
+				}
+			}
+			if (canCastle) {
+				Piece rook = Piece.getPiece(new Point(this.coordinate.x + 3, this.coordinate.y));
+				return new Move.ShortCastleMove(this, (Point) this.coordinate.clone(),
+						new Point(this.coordinate.x + 2, this.coordinate.y), rook);
+			}
+			// TODO: add long castle (The castle move can be modified)
+		}
+		return null;
 	}
 }

@@ -1,11 +1,10 @@
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public class Bishop extends Piece {
 
-	public Bishop(Point coordinate, Alliance side, LinkedList<Piece> allPieces) {
-		super(coordinate, side, allPieces);
+	public Bishop(Point coordinate, Alliance side) {
+		super(coordinate, side);
 		this.name = "bishop";
 		this.index += 2;
 	}
@@ -23,7 +22,7 @@ public class Bishop extends Piece {
 		checkPoint = (Point) this.coordinate.clone();
 		checkPoint.translate(translateX, translateY);
 		while (isOnBoard(checkPoint)) {
-			Piece otherPiece = Piece.getPiece(checkPoint, allPieces);
+			Piece otherPiece = Piece.getPiece(checkPoint);
 			if (otherPiece != null) {
 				if (otherPiece.side == side) {
 					break; // if same color, then return

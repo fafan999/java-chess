@@ -1,11 +1,10 @@
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public class Pawn extends Piece {
 
-	public Pawn(Point coordinate, Alliance side, LinkedList<Piece> allPieces) {
-		super(coordinate, side, allPieces);
+	public Pawn(Point coordinate, Alliance side) {
+		super(coordinate, side);
 		this.name = "pawn";
 		this.index += 5;
 	}
@@ -21,7 +20,7 @@ public class Pawn extends Piece {
 
 		// move one square forward
 		checkPoint.translate(0, direction);
-		firstOtherPiece = Piece.getPiece(checkPoint, this.allPieces);
+		firstOtherPiece = Piece.getPiece(checkPoint);
 		if (isOnBoard(checkPoint)) {
 			if (firstOtherPiece == null) {
 				possibleMoves
@@ -31,7 +30,7 @@ public class Pawn extends Piece {
 
 		// move two squares forward (double pawn push)
 		checkPoint.translate(0, direction);
-		secondOtherPiece = Piece.getPiece(checkPoint, this.allPieces);
+		secondOtherPiece = Piece.getPiece(checkPoint);
 		if (coordinate.y == startingRank && firstOtherPiece == null && secondOtherPiece == null) {
 			possibleMoves
 					.add(new Move.DoublePawnPush(this, (Point) this.coordinate.clone(), (Point) checkPoint.clone()));
@@ -41,17 +40,17 @@ public class Pawn extends Piece {
 		Point[] capturingSquares = { new Point(coordinate.x + 1, coordinate.y + direction),
 				new Point(coordinate.x - 1, coordinate.y + direction) };
 		for (Point p : capturingSquares) {
-			Piece otherPiece = Piece.getPiece(p, this.allPieces);
+			Piece otherPiece = Piece.getPiece(p);
 			if (otherPiece != null) {
 				if (otherPiece.side != this.side) {
 					possibleMoves.add(new Move.AttackMove(this, (Point) this.coordinate.clone(), p, otherPiece));
 				}
 			}
 			// capture enPassant
-//			if (p.equals(board.enPassantSquare)) {
-//				otherPiece = this.board.getPiece(new Point(p.x, p.y - direction));
-//				possibleMoves.add(new Move.AttackMove(this, this.coordinate, p, otherPiece));
-//			}
+			if (p.equals(ChessBoard.enPassantSquare)) {
+				otherPiece = Piece.getPiece(new Point(p.x, p.y - direction));
+				possibleMoves.add(new Move.AttackMove(this, (Point) this.coordinate.clone(), p, otherPiece));
+			}
 		}
 		return possibleMoves;
 	}
