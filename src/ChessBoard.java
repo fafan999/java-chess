@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
@@ -26,11 +27,13 @@ public class ChessBoard extends JPanel {
 	private Piece selectedPiece = null;
 	private ArrayList<Move> selectedPieceLegalMoves = new ArrayList<Move>(); // legal moves list of the selectedPiece
 	private Alliance sideToMove; // whose side to move
+	private JFrame topFrame;
 
-	public ChessBoard() {
+	public ChessBoard(JFrame mainFrame) {
 		super();
-//		positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq"); // initial position
-		positionFromFen("4k2r/6r1/8/8/8/8/3R4/R3K3 w Qk");
+		this.topFrame = mainFrame;
+		positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq"); // initial position
+//		positionFromFen("4k2r/6r1/8/8/8/8/3R4/R3K3 w Qk");
 		// get the images of the pieces ---------------------------------
 		try {
 			BufferedImage allPictures = ImageIO.read(new File("chess_set_SZB.png"));
@@ -64,7 +67,7 @@ public class ChessBoard extends JPanel {
 						allPieces.addLast(selectedPiece); // put it at the last so it is at the top
 					}
 				}
-				repaint();
+				topFrame.repaint();
 			}
 
 			@Override
@@ -77,7 +80,8 @@ public class ChessBoard extends JPanel {
 //					System.out.println("Is in check:" + isInCheck(Alliance.BLACK));
 					Piece.isKingInCheck(Alliance.BLACK);
 					selectedPiece = null;
-					repaint();
+
+					topFrame.repaint();
 				}
 			}
 
@@ -98,7 +102,8 @@ public class ChessBoard extends JPanel {
 				if (selectedPiece != null) {
 					selectedPiece.xRealPosition = e.getX() - (SIZE_OF_SQUARE / 2);
 					selectedPiece.yRealPosition = e.getY() - (SIZE_OF_SQUARE / 2);
-					repaint();
+					// repaint the top frame so the pieces won't leave a track in the background
+					topFrame.repaint();
 				}
 			}
 
