@@ -11,9 +11,8 @@ public abstract class Piece {
 
 	public Piece(Point coordinate, Alliance side) {
 		this.coordinate = coordinate;
-//		board.setRealPosition(this);
 		this.side = side;
-		if (Alliance.BLACK == side) {
+		if (side.isBlack()) {
 			// index of the black king image (second row)
 			this.index += 6;
 		}
@@ -75,7 +74,7 @@ public abstract class Piece {
 	 * @param coordinate
 	 * @return piece at the given coordinate
 	 */
-	public static Piece getPiece(Point coordinate) {
+	public static final Piece getPiece(Point coordinate) {
 		for (Piece p : ChessBoard.allPieces) {
 			if (p.coordinate.equals(coordinate)) {
 				return p;
@@ -126,12 +125,18 @@ public abstract class Piece {
 	public static boolean isKingInCheck(Alliance side) {
 		Piece king = Piece.getKing(side);
 		if (isCoordinateInCheck(king.side, king.coordinate)) {
-//			System.out.println("The " + side.toString().toLowerCase() + " is in check at " + king.coordinateToString());
 			return true;
 		}
 		return false;
 	}
 
+	/**
+	 * Check if the given coordinate can be reached by a piece of the opponent
+	 * 
+	 * @param side
+	 * @param coordinate
+	 * @return true if the coordinate is in check, false otherwise
+	 */
 	public static boolean isCoordinateInCheck(Alliance side, Point coordinate) {
 		ArrayList<Piece> oppositePieces = Piece.getOppositePieces(side);
 		for (Piece p : oppositePieces) {

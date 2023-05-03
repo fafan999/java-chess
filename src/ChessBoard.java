@@ -165,13 +165,14 @@ public class ChessBoard extends JPanel {
 
 	/**
 	 * Get the selected piece possible moves and remove every move that leaves the
-	 * loyal king in check
+	 * loyal king in check. Also add the castle moves if they are allowed.
 	 * 
 	 * @param selectedPiece
 	 */
 	public void setLegalMoves(Piece selectedPiece) {
 		ArrayList<Move> illegalMoves = new ArrayList<Move>();
 		if (selectedPiece != null) {
+			// check if the possible move is legal
 			this.selectedPieceLegalMoves = selectedPiece.getPossibleMoves();
 			for (Move m : this.selectedPieceLegalMoves) {
 				// make the move
@@ -189,9 +190,10 @@ public class ChessBoard extends JPanel {
 				selectedPieceLegalMoves.remove(m);
 			}
 			if (selectedPiece instanceof King) {
-				Move castleMove = ((King) selectedPiece).getCastleMoves();
-				if (castleMove != null) {
-					selectedPieceLegalMoves.add(castleMove);
+				// add castle moves (they are already checked)
+				ArrayList<Move> castleMoves = ((King) selectedPiece).getCastleMoves();
+				if (castleMoves != null) {
+					selectedPieceLegalMoves.addAll(castleMoves);
 				}
 			}
 		} else {
@@ -256,11 +258,13 @@ public class ChessBoard extends JPanel {
 		}
 
 		if (movedPiece.side.isBlack()) {
+			// right Rook or the king moved
 			if (movedPiece instanceof King
 					|| (movedPiece instanceof Rook && movedPiece.coordinate.equals(new Point(7, 7)))) {
 				blackCanShortCastle = false;
 				System.out.println("blackCanShortCastle " + blackCanShortCastle);
 			}
+			// left Rook or the king moved
 			if (movedPiece instanceof King
 					|| (movedPiece instanceof Rook && movedPiece.coordinate.equals(new Point(0, 7)))) {
 				blackCanLongCastle = false;

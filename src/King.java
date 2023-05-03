@@ -37,10 +37,11 @@ public class King extends Piece {
 		return possibleMoves;
 	}
 
-	public Move getCastleMoves() {
+	public ArrayList<Move> getCastleMoves() {
+		ArrayList<Move> castleMoves = new ArrayList<Move>();
 		// castle short
 		if (this.side.getShortCastle()) {
-			boolean canCastle = true;
+			boolean canShortCastle = true;
 			int x = this.coordinate.x;
 			int y = this.coordinate.y;
 			Point[] shortCastleSquares = { new Point(x + 1, y), new Point(x + 2, y) };
@@ -49,17 +50,37 @@ public class King extends Piece {
 				// if any of the coordinates is in check, castle is forbidden
 				if (Piece.getPiece(p) != null || Piece.isCoordinateInCheck(this.side, p)
 						|| Piece.isKingInCheck(this.side)) {
-					canCastle = false;
+					canShortCastle = false;
 					break;
 				}
 			}
-			if (canCastle) {
+			if (canShortCastle) {
 				Piece rook = Piece.getPiece(new Point(this.coordinate.x + 3, this.coordinate.y));
-				return new Move.ShortCastleMove(this, (Point) this.coordinate.clone(),
-						new Point(this.coordinate.x + 2, this.coordinate.y), rook);
+				castleMoves.add(new Move.CastleMove(this, (Point) this.coordinate.clone(),
+						new Point(this.coordinate.x + 2, this.coordinate.y), rook));
 			}
-			// TODO: add long castle (The castle move can be modified)
 		}
-		return null;
+		// castle long
+		if (this.side.getLongCastle()) {
+			boolean canLongCastle = true;
+			int x = this.coordinate.x;
+			int y = this.coordinate.y;
+			Point[] longCastleSquares = { new Point(x - 1, y), new Point(x - 2, y) };
+			for (Point p : longCastleSquares) {
+				// if there is a piece between the king and the rook, castle is forbidden
+				// if any of the coordinates is in check, castle is forbidden
+				if (Piece.getPiece(p) != null || Piece.getPiece(new Point(x - 3, y)) != null
+						|| Piece.isCoordinateInCheck(this.side, p) || Piece.isKingInCheck(this.side)) {
+					canLongCastle = false;
+					break;
+				}
+			}
+			if (canLongCastle) {
+				Piece rook = Piece.getPiece(new Point(this.coordinate.x - 4, this.coordinate.y));
+				castleMoves.add(new Move.CastleMove(this, (Point) this.coordinate.clone(),
+						new Point(this.coordinate.x - 2, this.coordinate.y), rook));
+			}
+		}
+		return castleMoves;
 	}
 }

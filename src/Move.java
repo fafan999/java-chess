@@ -96,17 +96,26 @@ public abstract class Move {
 		}
 	}
 
-	public static final class ShortCastleMove extends Move {
+	public static final class CastleMove extends Move {
 
 		private final Piece rook;
 		private final Point rookStartCoordinate;
 		private final Point rookDestinationCoordinate;
+		private final int rookDirection;
 
-		public ShortCastleMove(Piece movedPiece, Point startCoordinate, Point destinationCoordinate, Piece rook) {
+		public CastleMove(Piece movedPiece, Point startCoordinate, Point destinationCoordinate, Piece rook) {
 			super(movedPiece, startCoordinate, destinationCoordinate);
+			if (this.startCoordinate.x < rook.coordinate.x) {
+				// right rook (short castle - king side castle)
+				this.rookDirection = -1;
+			} else {
+				// left rook (long castle - queen side castle)
+				this.rookDirection = +1;
+			}
 			this.rook = rook;
 			this.rookStartCoordinate = rook.coordinate;
-			this.rookDestinationCoordinate = new Point(this.destinationCoordiante.x - 1, this.destinationCoordiante.y);
+			this.rookDestinationCoordinate = new Point(this.destinationCoordiante.x + this.rookDirection,
+					this.destinationCoordiante.y);
 		}
 
 		@Override
