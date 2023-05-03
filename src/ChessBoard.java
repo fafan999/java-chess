@@ -19,17 +19,18 @@ public class ChessBoard extends JPanel {
 	public static final int SIZE_OF_SQUARE = 64; // determine how big the board is
 	public static LinkedList<Piece> allPieces = new LinkedList<>(); // list for tracking the pieces
 	public static Point enPassantSquare = null; // en passant square
-	public static boolean whiteCanShortCastle = true;
-	public static boolean whiteCanLongCastle = true;
-	public static boolean blackCanShortCastle = true;
-	public static boolean blackCanLongCastle = true;
+	public static boolean whiteCanShortCastle;
+	public static boolean whiteCanLongCastle;
+	public static boolean blackCanShortCastle;
+	public static boolean blackCanLongCastle;
 	private Piece selectedPiece = null;
 	private ArrayList<Move> selectedPieceLegalMoves = new ArrayList<Move>(); // legal moves list of the selectedPiece
-	private Alliance sideToMove = Alliance.WHITE; // white starts
+	private Alliance sideToMove; // whose side to move
 
 	public ChessBoard() {
 		super();
-		positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR "); // initial position
+//		positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq"); // initial position
+		positionFromFen("4k2r/6r1/8/8/8/8/3R4/R3K3 w Qk");
 		// get the images of the pieces ---------------------------------
 		try {
 			BufferedImage allPictures = ImageIO.read(new File("chess_set_SZB.png"));
@@ -164,12 +165,12 @@ public class ChessBoard extends JPanel {
 	}
 
 	/**
-	 * Get the selected piece possible moves and remove every move that leaves the
+	 * Set the selected piece possible moves and remove every move that leaves the
 	 * loyal king in check. Also add the castle moves if they are allowed.
 	 * 
 	 * @param selectedPiece
 	 */
-	public void setLegalMoves(Piece selectedPiece) {
+	private void setLegalMoves(Piece selectedPiece) {
 		ArrayList<Move> illegalMoves = new ArrayList<Move>();
 		if (selectedPiece != null) {
 			// check if the possible move is legal
@@ -280,7 +281,7 @@ public class ChessBoard extends JPanel {
 	 */
 	private void positionFromFen(String fen) {
 		String squares = fen.substring(0, fen.indexOf(" ")); // squares of the Pieces
-		String state = fen.substring(fen.indexOf(" ") + 1); // state of the game TODO (e.g. white to move)
+		String state = fen.substring(fen.indexOf(" ") + 1); // state of the game TODO (en passant square, )
 		String[] ranks = squares.split("/"); // every rank is divided with "/"
 
 		int rank = 7; // reading starts from the 8th rank
@@ -297,6 +298,12 @@ public class ChessBoard extends JPanel {
 			}
 			rank--; // step to the next rank
 		}
+
+		this.sideToMove = state.toLowerCase().contains("w") ? Alliance.WHITE : Alliance.BLACK;
+		whiteCanShortCastle = state.contains("K");
+		whiteCanLongCastle = state.contains("Q");
+		blackCanShortCastle = state.contains("k");
+		blackCanLongCastle = state.contains("Q");
 	}
 
 	/**
