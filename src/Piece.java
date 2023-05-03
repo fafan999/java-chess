@@ -10,7 +10,7 @@ public abstract class Piece {
 	public String name; // type of the piece
 
 	public Piece(Point coordinate, Alliance side) {
-		this.coordinate = coordinate;
+		this.coordinate = coordinate; // x -> file, y+1 -> rank
 		this.side = side;
 		if (side.isBlack()) {
 			// index of the black king image (second row)
@@ -45,14 +45,6 @@ public abstract class Piece {
 		// we count rank from bottom of the table
 		this.yRealPosition = (7 - this.coordinate.y) * ChessBoard.SIZE_OF_SQUARE;
 	}
-
-//	public static boolean leavesKingInCheck(Alliance side, LinkedList<Piece> allPieces) {
-//		LinkedList<Piece> nextAllPieces = (LinkedList<Piece>) allPieces.clone();
-//		
-//		
-//
-//		return false;
-//	}
 
 	/**
 	 * Check if the given coordinate is on the board

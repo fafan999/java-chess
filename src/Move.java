@@ -1,7 +1,6 @@
 import java.awt.Point;
 
 public abstract class Move {
-
 	final Piece movedPiece;
 	final Point startCoordinate;
 	final Point destinationCoordiante;
@@ -18,12 +17,15 @@ public abstract class Move {
 	 */
 	public abstract void makeMove();
 
+	/**
+	 * Reset this move on the board
+	 */
 	public abstract void resetMove();
 
-//	public abstract boolean leavesKingInCheck();
-
+	/**
+	 * Handling basic moves
+	 */
 	public static final class QuietMove extends Move {
-
 		public QuietMove(Piece movedPiece, Point startCoordinate, Point destinationCoordinate) {
 			super(movedPiece, startCoordinate, destinationCoordinate);
 		}
@@ -39,16 +41,12 @@ public abstract class Move {
 			this.movedPiece.coordinate.setLocation(this.startCoordinate);
 			this.movedPiece.setRealPosition();
 		}
-
 	}
 
 	/**
 	 * Handling the moves resulting in capture
-	 * 
-	 * @author superpc
 	 */
 	public static final class AttackMove extends Move {
-
 		private final Piece attackedPiece;
 
 		public AttackMove(Piece movedPiece, Point startCoordinate, Point destinationCoordinate, Piece attackedPiece) {
@@ -73,12 +71,8 @@ public abstract class Move {
 
 	/**
 	 * Handling the double pawn push moves
-	 * 
-	 * @author superpc
-	 *
 	 */
 	public static final class DoublePawnPush extends Move {
-
 		public DoublePawnPush(Piece movedPiece, Point startCoordinate, Point destinationCoordinate) {
 			super(movedPiece, startCoordinate, destinationCoordinate);
 		}
@@ -96,8 +90,10 @@ public abstract class Move {
 		}
 	}
 
+	/**
+	 * Handling castles
+	 */
 	public static final class CastleMove extends Move {
-
 		private final Piece rook;
 		private final Point rookStartCoordinate;
 		private final Point rookDestinationCoordinate;
@@ -128,10 +124,67 @@ public abstract class Move {
 
 		@Override
 		public void resetMove() {
+			// TODO remove this, as it is not needed, and not correctly implemented
 			this.movedPiece.coordinate.setLocation(this.startCoordinate);
 			this.movedPiece.setRealPosition();
 			this.rook.coordinate.setLocation(this.rookStartCoordinate);
 			this.rook.setRealPosition();
 		}
+	}
+
+	public static final class PromotionMove extends Move {
+		private Piece promotionPiece;
+
+		public PromotionMove(Piece movedPiece, Point startCoordinate, Point destinationCoordinate) {
+			super(movedPiece, startCoordinate, destinationCoordinate);
+
+		}
+
+		@Override
+		public void makeMove() {
+			ChessBoard.allPieces.remove(this.movedPiece);
+			promotionPiece = this.createNewPiece();
+		}
+
+		@Override
+		public void resetMove() {
+			ChessBoard.allPieces.remove(this.promotionPiece);
+			ChessBoard.allPieces.add(this.movedPiece);
+		}
+
+		private final Piece createNewPiece() {
+			return new Queen(this.destinationCoordiante, this.movedPiece.side);
+		}
+	}
+
+	public static final class AttackPromotionMove extends Move {
+		private final Piece attackedPiece;
+		private Piece promotionPiece;
+
+		public AttackPromotionMove(Piece movedPiece, Point startCoordinate, Point destinationCoordinate,
+				Piece attackedPiece) {
+			super(movedPiece, startCoordinate, destinationCoordinate);
+			this.attackedPiece = attackedPiece;
+		}
+
+		@Override
+		public void makeMove() {
+			this.attackedPiece.take();
+			ChessBoard.allPieces.remove(this.movedPiece);
+			promotionPiece = this.createNewPiece();
+
+		}
+
+		@Override
+		public void resetMove() {
+			ChessBoard.allPieces.remove(this.promotionPiece);
+			ChessBoard.allPieces.add(this.attackedPiece);
+			ChessBoard.allPieces.add(this.movedPiece);
+		}
+
+		private final Piece createNewPiece() {
+			return new Queen(this.destinationCoordiante, this.movedPiece.side);
+		}
+
 	}
 }

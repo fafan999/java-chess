@@ -17,12 +17,16 @@ public class Pawn extends Piece {
 		Point checkPoint = (Point) this.coordinate.clone();
 		int direction = this.side.getDirection();
 		int startingRank = this.side.getStartingRank();
+		int promotionRank = startingRank + direction * 6;
 
 		// move one square forward
 		checkPoint.translate(0, direction);
 		firstOtherPiece = Piece.getPiece(checkPoint);
-		if (isOnBoard(checkPoint)) {
-			if (firstOtherPiece == null) {
+		if (isOnBoard(checkPoint) && firstOtherPiece == null) {
+			if (checkPoint.y == promotionRank) {
+				possibleMoves
+						.add(new Move.PromotionMove(this, (Point) this.coordinate.clone(), (Point) checkPoint.clone()));
+			} else {
 				possibleMoves
 						.add(new Move.QuietMove(this, (Point) this.coordinate.clone(), (Point) checkPoint.clone()));
 			}
@@ -42,7 +46,11 @@ public class Pawn extends Piece {
 		for (Point p : capturingSquares) {
 			Piece otherPiece = Piece.getPiece(p);
 			if (otherPiece != null) {
-				if (otherPiece.side != this.side) {
+
+				if (otherPiece.side != this.side && p.y == promotionRank) {
+					possibleMoves
+							.add(new Move.AttackPromotionMove(this, (Point) this.coordinate.clone(), p, otherPiece));
+				} else if (otherPiece.side != this.side) {
 					possibleMoves.add(new Move.AttackMove(this, (Point) this.coordinate.clone(), p, otherPiece));
 				}
 			}
@@ -54,4 +62,8 @@ public class Pawn extends Piece {
 		}
 		return possibleMoves;
 	}
+
+//	public Piece createPromotionPiece() {
+//		return new Queen(this.coordinate, this.side);
+//	}
 }
