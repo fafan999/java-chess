@@ -1,5 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
@@ -12,11 +13,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 import javax.imageio.ImageIO;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 
 @SuppressWarnings("serial")
 public class ChessBoard extends JPanel {
@@ -56,7 +55,6 @@ public class ChessBoard extends JPanel {
 		addMouseListener(new MouseListener() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				// TODO Auto-generated method stub
 			}
 
 			@Override
@@ -88,12 +86,10 @@ public class ChessBoard extends JPanel {
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
 			}
 		});
 
@@ -110,11 +106,10 @@ public class ChessBoard extends JPanel {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				// TODO Auto-generated method stub
 			}
 		});
 	}
-	
+
 	/**
 	 * Draw the board and everything on it.
 	 */
@@ -206,19 +201,16 @@ public class ChessBoard extends JPanel {
 		} else {
 			this.selectedPieceLegalMoves.clear();
 		}
-		System.out.println("set legal moves");
 	}
 
-//	public ArrayList<Move> getPieceMoves(Piece selectedPiece) {
-//		return selectedPiece.getPossibleMoves();
-//	}
-
+	/**
+	 * Make the move if it is a valid move, also do some checks about the state of
+	 * the game
+	 * 
+	 * @param selectedPiece the piece of the tried move
+	 * @param newCoordinate the coordinate of the tried move
+	 */
 	public void validateMove(Piece selectedPiece, Point newCoordinate) {
-		// check which side turn it is
-//		if (selectedPiece.isWhite != sideToMove) {
-//			return;
-//		}		
-//		ArrayList<Move> pieceMoves = selectedPiece.getPossibleMoves();
 		Move newMove = null;
 		// get the new move corresponding to the new coordinate
 		for (Move p : this.selectedPieceLegalMoves) {
@@ -234,17 +226,19 @@ public class ChessBoard extends JPanel {
 			} else {
 				ChessBoard.enPassantSquare = null;
 			}
-			// check if castle is not available anymore
+			// check if castle is available
 			if (whiteCanShortCastle || whiteCanLongCastle || blackCanShortCastle || blackCanLongCastle) {
 				checkCastle(newMove);
 			}
-			
+			// check if it is a PromotionMove
 			if (newMove instanceof Move.PromotionMove || newMove instanceof Move.AttackPromotionMove) {
 				this.choosePromotion(newMove);
 			}
 
 			newMove.makeMove();
 			this.sideToMove = this.sideToMove.getOppositeSide(); // the next turn
+
+			// TODO check if it is a checkmate or a stalemate
 		} else {
 			selectedPiece.setRealPosition();
 			System.out.println("The " + selectedPiece + " can't move to " + newCoordinate + ".");
@@ -252,20 +246,23 @@ public class ChessBoard extends JPanel {
 		this.selectedPieceLegalMoves.clear();
 	}
 
-	private void checkCastle(Move validatedMove) {
-		Piece movedPiece = validatedMove.movedPiece;
+	/**
+	 * Check if either side can castle based on the castle booleans
+	 * 
+	 * @param validatedMove
+	 */
+	private void checkCastle(Move newMove) {
+		Piece movedPiece = newMove.movedPiece;
 		if (movedPiece.side.isWhite()) {
 			// right Rook or the king moved
 			if (movedPiece instanceof King
 					|| (movedPiece instanceof Rook && movedPiece.coordinate.equals(new Point(7, 0)))) {
 				whiteCanShortCastle = false;
-				System.out.println("whiteCanShortCastle " + whiteCanShortCastle);
 			}
 			// left Rook or the king moved
 			if (movedPiece instanceof King
 					|| (movedPiece instanceof Rook && movedPiece.coordinate.equals(new Point(0, 0)))) {
 				whiteCanLongCastle = false;
-				System.out.println("whiteCanLongCastle " + whiteCanLongCastle);
 			}
 		}
 
@@ -274,13 +271,11 @@ public class ChessBoard extends JPanel {
 			if (movedPiece instanceof King
 					|| (movedPiece instanceof Rook && movedPiece.coordinate.equals(new Point(7, 7)))) {
 				blackCanShortCastle = false;
-				System.out.println("blackCanShortCastle " + blackCanShortCastle);
 			}
 			// left Rook or the king moved
 			if (movedPiece instanceof King
 					|| (movedPiece instanceof Rook && movedPiece.coordinate.equals(new Point(0, 7)))) {
 				blackCanLongCastle = false;
-				System.out.println("blackCanLongCastle " + blackCanLongCastle);
 			}
 		}
 	}
@@ -320,8 +315,8 @@ public class ChessBoard extends JPanel {
 	/**
 	 * Crate a new piece at the given coordinate
 	 * 
-	 * @param coordinate
-	 * @param pieceType  The type of the piece
+	 * @param coordinate coordinate of the new piece
+	 * @param pieceType  type of the piece
 	 */
 	public static void createNewPiece(Point coordinate, char pieceType) {
 		final Alliance side;
@@ -352,40 +347,58 @@ public class ChessBoard extends JPanel {
 			break;
 		}
 	}
-	
+
 	public void restartTheGame() {
 		ChessBoard.allPieces.clear();
 		ChessBoard.enPassantSquare = null;
 		this.positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq"); // initial position
 		this.repaint();
 	}
-	
-	private void choosePromotion(Move promotionMove) {
-		JComboBox<String> list = new JComboBox<String>(new String[] {"Vezér", "Bástya", "Huszár", "Futó"});		
-        // Add to panel with accompanying label
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new JLabel("Mivé váljon eme győzedelmes egység?"), BorderLayout.NORTH);
-        panel.add(list);
-        
-        JOptionPane.showMessageDialog(this.topFrame, panel);
-        
-        String choice = (String) list.getSelectedItem();
-        Piece promotionPiece;        
 
-        if(choice.equals("Bástya")) {
-        	promotionPiece = new Rook(promotionMove.destinationCoordiante, promotionMove.movedPiece.side);
-        } else if (choice.equals("Huszár")) {
-        	promotionPiece = new Knight(promotionMove.destinationCoordiante, promotionMove.movedPiece.side);
-        } else if (choice.equals("Futó")) {
-        	promotionPiece = new Bishop(promotionMove.destinationCoordiante, promotionMove.movedPiece.side);
-        } else {
-        	promotionPiece = new Queen(promotionMove.destinationCoordiante, promotionMove.movedPiece.side);
-        }
-        
+	/**
+	 * Make a popup window to let the player choose the promoted piece
+	 * 
+	 * @param promotionMove
+	 */
+	private void choosePromotion(Move promotionMove) {
+		JComboBox<String> list = new JComboBox<String>(new String[] { "Vezér", "Bástya", "Huszár", "Futó" });
+		list.setFont(new Font("Arial", Font.PLAIN, 20));
+
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.add(list, BorderLayout.SOUTH);
+
+		Color textColor;
+		Color buttonColor;
+		String title;
+		if (promotionMove.movedPiece.side.isWhite()) {
+			textColor = Color.BLACK;
+			buttonColor = Color.WHITE;
+			title = "Fehér gyalog előléptetése";
+		} else {
+			textColor = Color.WHITE;
+			buttonColor = Color.BLACK;
+			title = "Fekete gyalog előléptetése";
+		}
+
+		SuperChess.popupDialog(topFrame, "Mivé váljon eme győzedelmes egység?", title, textColor, buttonColor, panel);
+
+		String choice = (String) list.getSelectedItem();
+		Piece promotionPiece;
+
+		if (choice.equals("Bástya")) {
+			promotionPiece = new Rook(promotionMove.destinationCoordiante, promotionMove.movedPiece.side);
+		} else if (choice.equals("Huszár")) {
+			promotionPiece = new Knight(promotionMove.destinationCoordiante, promotionMove.movedPiece.side);
+		} else if (choice.equals("Futó")) {
+			promotionPiece = new Bishop(promotionMove.destinationCoordiante, promotionMove.movedPiece.side);
+		} else {
+			promotionPiece = new Queen(promotionMove.destinationCoordiante, promotionMove.movedPiece.side);
+		}
+
 		if (promotionMove instanceof Move.PromotionMove) {
 			((Move.PromotionMove) promotionMove).setPromotionPiece(promotionPiece);
 		}
-		
+
 		if (promotionMove instanceof Move.AttackPromotionMove) {
 			((Move.AttackPromotionMove) promotionMove).setPromotionPiece(promotionPiece);
 		}

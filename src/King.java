@@ -37,6 +37,11 @@ public class King extends Piece {
 		return possibleMoves;
 	}
 
+	/**
+	 * Get the king's castle moves. They are already validated.
+	 * 
+	 * @return
+	 */
 	public ArrayList<Move> getCastleMoves() {
 		ArrayList<Move> castleMoves = new ArrayList<Move>();
 		// castle short

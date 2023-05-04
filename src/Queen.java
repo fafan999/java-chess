@@ -9,6 +9,33 @@ public class Queen extends Piece {
 		this.index += 1;
 	}
 
+	@Override
+	public ArrayList<Move> getPossibleMoves() {
+		ArrayList<Move> possibleMoves = new ArrayList<Move>();
+
+		// BISHOP
+		// Check diagonal moves to the top left
+		checkLine(-1, 1, possibleMoves);
+		// Check diagonal moves to the top right
+		checkLine(1, 1, possibleMoves);
+		// Check diagonal moves to the bottom left
+		checkLine(-1, -1, possibleMoves);
+		// Check diagonal moves to the bottom right
+		checkLine(1, -1, possibleMoves);
+
+		// ROOK
+		// Check moves towards top
+		checkLine(0, 1, possibleMoves);
+		// Check moves towards bottom
+		checkLine(0, -1, possibleMoves);
+		// Check moves towards left
+		checkLine(-1, 0, possibleMoves);
+		// Check moves towards right
+		checkLine(1, 0, possibleMoves);
+
+		return possibleMoves;
+	}
+
 	/**
 	 * Check moves in a line
 	 * 
@@ -37,33 +64,6 @@ public class Queen extends Piece {
 			checkPoint.translate(translateX, translateY);
 		}
 
-	}
-
-	@Override
-	public ArrayList<Move> getPossibleMoves() {
-		ArrayList<Move> possibleMoves = new ArrayList<Move>();
-
-		// BISHOP
-		// Check diagonal moves to the top left
-		checkLine(-1, 1, possibleMoves);
-		// Check diagonal moves to the top right
-		checkLine(1, 1, possibleMoves);
-		// Check diagonal moves to the bottom left
-		checkLine(-1, -1, possibleMoves);
-		// Check diagonal moves to the bottom right
-		checkLine(1, -1, possibleMoves);
-
-		// ROOK
-		// Check moves towards top
-		checkLine(0, 1, possibleMoves);
-		// Check moves towards bottom
-		checkLine(0, -1, possibleMoves);
-		// Check moves towards left
-		checkLine(-1, 0, possibleMoves);
-		// Check moves towards right
-		checkLine(1, 0, possibleMoves);
-
-		return possibleMoves;
 	}
 
 }

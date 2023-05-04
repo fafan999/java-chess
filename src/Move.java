@@ -142,17 +142,21 @@ public abstract class Move {
 		@Override
 		public void makeMove() {
 			ChessBoard.allPieces.remove(this.movedPiece);
+			if (this.promotionPiece == null) {
+				this.promotionPiece = new Queen(this.destinationCoordiante, this.movedPiece.side);
+			}
 		}
 
 		@Override
 		public void resetMove() {
 			ChessBoard.allPieces.remove(this.promotionPiece);
+			this.promotionPiece = null;
 			ChessBoard.allPieces.add(this.movedPiece);
 		}
-		
+
 		public final void setPromotionPiece(Piece promotionPiece) {
 			this.promotionPiece = promotionPiece;
-		}		
+		}
 	}
 
 	public static final class AttackPromotionMove extends Move {
@@ -178,10 +182,10 @@ public abstract class Move {
 			ChessBoard.allPieces.add(this.attackedPiece);
 			ChessBoard.allPieces.add(this.movedPiece);
 		}
-		
+
 		public final void setPromotionPiece(Piece promotionPiece) {
 			this.promotionPiece = promotionPiece;
-		}	
+		}
 
 	}
 }

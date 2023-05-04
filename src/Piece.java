@@ -5,7 +5,7 @@ public abstract class Piece {
 	public Point coordinate; // position on the chessboard
 	public int xRealPosition; // position when it is dragged
 	public int yRealPosition;
-	protected int index = 0; // index of the white king image (first row)
+	int index = 0; // index of the white king image (first row)
 	public final Alliance side; // the side the piece belongs to
 	public String name; // type of the piece
 
@@ -20,6 +20,11 @@ public abstract class Piece {
 		ChessBoard.allPieces.add(this); // add the piece to the rest of the pieces
 	}
 
+	/**
+	 * Calculate the piece possible moves without validating them
+	 * 
+	 * @return
+	 */
 	public abstract ArrayList<Move> getPossibleMoves();
 
 	public void take() {

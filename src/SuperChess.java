@@ -1,3 +1,4 @@
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -7,9 +8,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame; //for the main window
+import javax.swing.JLabel;
 import javax.swing.JOptionPane; // popup window
-
+import javax.swing.JPanel;
 
 public class SuperChess {
 	public static void main(String[] args) {
@@ -35,7 +38,7 @@ public class SuperChess {
 		whiteResign.setForeground(Color.BLACK);
 		whiteResign.setFont(new Font("Arial", Font.PLAIN, 20));
 		whiteResign.setFocusPainted(false);
-		
+
 		ChessBoard chessBoard = new ChessBoard(mainFrame);
 		chessBoard.setSize(ChessBoard.SIZE_OF_SQUARE * 8, ChessBoard.SIZE_OF_SQUARE * 8);
 
@@ -75,13 +78,84 @@ public class SuperChess {
 		mainFrame.setResizable(false); // Do not let the user to resize the window
 		mainFrame.setLocationRelativeTo(null); // center the window
 		mainFrame.setVisible(true);
-		
-		draw.addActionListener(new ActionListener() {			
+
+		draw.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(mainFrame, "Döntetlen a játékosok közös megegyezése alapján.");
-				chessBoard.restartTheGame();				
+				popupDialog(mainFrame, "Döntetlen a játékosok közös megegyezése alapján.", "Döntetlen!", Color.BLACK,
+						new Color(190, 205, 158), null);
+				chessBoard.restartTheGame();
 			}
 		});
+
+		blackResign.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				popupDialog(mainFrame, "A fehér oldal győzőtt, mert az ellenfél feladta a játékot.", "Fehér győzelem!",
+						Color.BLACK, Color.WHITE, null);
+				chessBoard.restartTheGame();
+			}
+		});
+
+		whiteResign.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				popupDialog(mainFrame, "A fekete oldal győzőtt, mert az ellenfél feladta a játékot.",
+						"Fekete győzelem!", Color.WHITE, Color.BLACK, null);
+				chessBoard.restartTheGame();
+			}
+		});
+	}
+
+	/**
+	 * Make a popup window to the user to interact with is *
+	 * 
+	 * @param mainframe   parent window
+	 * @param text        information about the window
+	 * @param title       title of the popup window
+	 * @param textColor   button text color
+	 * @param buttonColor button background color
+	 * @param panel       panel of the option dialog
+	 */
+	static void popupDialog(JFrame mainframe, String text, String title, Color textColor, Color buttonColor,
+			JPanel panel) {
+		JButton okButton = new JButton("ok");
+		okButton.setBackground(buttonColor);
+		okButton.setForeground(textColor);
+		okButton.setFont(new Font("Arial", Font.PLAIN, 20));
+		okButton.setFocusPainted(false); // prettier
+		okButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane pane = getOptionPane((JComponent) e.getSource());
+				pane.setValue(okButton);
+			}
+		});
+
+		JLabel label = new JLabel(text);
+		label.setFont(new Font("Arial", Font.PLAIN, 20));
+		if (panel == null) {
+			panel = new JPanel(new BorderLayout());
+		}
+		panel.add(label, BorderLayout.NORTH);
+
+		JOptionPane.showOptionDialog(mainframe, panel, title, JOptionPane.OK_OPTION, JOptionPane.PLAIN_MESSAGE, null,
+				new Object[] { okButton }, okButton);
+	}
+
+	/**
+	 * Get the JOptionPane of the button
+	 * 
+	 * @param parent JOptionPane
+	 * @return The JOptionPane of the button
+	 */
+	private static JOptionPane getOptionPane(JComponent parent) {
+		JOptionPane pane = null;
+		if (!(parent instanceof JOptionPane)) {
+			pane = getOptionPane((JComponent) parent.getParent());
+		} else {
+			pane = (JOptionPane) parent;
+		}
+		return pane;
 	}
 }
