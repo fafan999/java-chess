@@ -3,9 +3,13 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame; //for the main window
+import javax.swing.JOptionPane; // popup window
+
 
 public class SuperChess {
 	public static void main(String[] args) {
@@ -31,7 +35,7 @@ public class SuperChess {
 		whiteResign.setForeground(Color.BLACK);
 		whiteResign.setFont(new Font("Arial", Font.PLAIN, 20));
 		whiteResign.setFocusPainted(false);
-
+		
 		ChessBoard chessBoard = new ChessBoard(mainFrame);
 		chessBoard.setSize(ChessBoard.SIZE_OF_SQUARE * 8, ChessBoard.SIZE_OF_SQUARE * 8);
 
@@ -71,5 +75,13 @@ public class SuperChess {
 		mainFrame.setResizable(false); // Do not let the user to resize the window
 		mainFrame.setLocationRelativeTo(null); // center the window
 		mainFrame.setVisible(true);
+		
+		draw.addActionListener(new ActionListener() {			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(mainFrame, "Döntetlen a játékosok közös megegyezése alapján.");
+				chessBoard.restartTheGame();				
+			}
+		});
 	}
 }

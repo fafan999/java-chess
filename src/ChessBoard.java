@@ -1,3 +1,4 @@
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -13,6 +14,9 @@ import java.util.LinkedList;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 @SuppressWarnings("serial")
 public class ChessBoard extends JPanel {
@@ -73,11 +77,8 @@ public class ChessBoard extends JPanel {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				if (selectedPiece != null) {
-//					selectedPiece.move(new Point(e.getX()/SIZE_OF_SQUARE, 7-e.getY()/SIZE_OF_SQUARE));
 					validateMove(selectedPiece, new Point(e.getX() / SIZE_OF_SQUARE, 7 - e.getY() / SIZE_OF_SQUARE));
-//					System.out.println(selectedPiece.coordinate.toString());
 					System.out.println(selectedPiece);
-//					System.out.println("Is in check:" + isInCheck(Alliance.BLACK));
 					Piece.isKingInCheck(Alliance.BLACK);
 					selectedPiece = null;
 
@@ -113,7 +114,7 @@ public class ChessBoard extends JPanel {
 			}
 		});
 	}
-
+	
 	/**
 	 * Draw the board and everything on it.
 	 */
@@ -237,6 +238,10 @@ public class ChessBoard extends JPanel {
 			if (whiteCanShortCastle || whiteCanLongCastle || blackCanShortCastle || blackCanLongCastle) {
 				checkCastle(newMove);
 			}
+			
+			if (newMove instanceof Move.PromotionMove || newMove instanceof Move.AttackPromotionMove) {
+				this.choosePromotion(newMove);
+			}
 
 			newMove.makeMove();
 			this.sideToMove = this.sideToMove.getOppositeSide(); // the next turn
@@ -244,6 +249,7 @@ public class ChessBoard extends JPanel {
 			selectedPiece.setRealPosition();
 			System.out.println("The " + selectedPiece + " can't move to " + newCoordinate + ".");
 		}
+		this.selectedPieceLegalMoves.clear();
 	}
 
 	private void checkCastle(Move validatedMove) {
@@ -344,6 +350,44 @@ public class ChessBoard extends JPanel {
 		case "k":
 			new King(coordinate, side);
 			break;
+		}
+	}
+	
+	public void restartTheGame() {
+		ChessBoard.allPieces.clear();
+		ChessBoard.enPassantSquare = null;
+		this.positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq"); // initial position
+		this.repaint();
+	}
+	
+	private void choosePromotion(Move promotionMove) {
+		JComboBox<String> list = new JComboBox<String>(new String[] {"Vezér", "Bástya", "Huszár", "Futó"});		
+        // Add to panel with accompanying label
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JLabel("Mivé váljon eme győzedelmes egység?"), BorderLayout.NORTH);
+        panel.add(list);
+        
+        JOptionPane.showMessageDialog(this.topFrame, panel);
+        
+        String choice = (String) list.getSelectedItem();
+        Piece promotionPiece;        
+
+        if(choice.equals("Bástya")) {
+        	promotionPiece = new Rook(promotionMove.destinationCoordiante, promotionMove.movedPiece.side);
+        } else if (choice.equals("Huszár")) {
+        	promotionPiece = new Knight(promotionMove.destinationCoordiante, promotionMove.movedPiece.side);
+        } else if (choice.equals("Futó")) {
+        	promotionPiece = new Bishop(promotionMove.destinationCoordiante, promotionMove.movedPiece.side);
+        } else {
+        	promotionPiece = new Queen(promotionMove.destinationCoordiante, promotionMove.movedPiece.side);
+        }
+        
+		if (promotionMove instanceof Move.PromotionMove) {
+			((Move.PromotionMove) promotionMove).setPromotionPiece(promotionPiece);
+		}
+		
+		if (promotionMove instanceof Move.AttackPromotionMove) {
+			((Move.AttackPromotionMove) promotionMove).setPromotionPiece(promotionPiece);
 		}
 	}
 }

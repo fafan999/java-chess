@@ -137,13 +137,11 @@ public abstract class Move {
 
 		public PromotionMove(Piece movedPiece, Point startCoordinate, Point destinationCoordinate) {
 			super(movedPiece, startCoordinate, destinationCoordinate);
-
 		}
 
 		@Override
 		public void makeMove() {
 			ChessBoard.allPieces.remove(this.movedPiece);
-			promotionPiece = this.createNewPiece();
 		}
 
 		@Override
@@ -151,10 +149,10 @@ public abstract class Move {
 			ChessBoard.allPieces.remove(this.promotionPiece);
 			ChessBoard.allPieces.add(this.movedPiece);
 		}
-
-		private final Piece createNewPiece() {
-			return new Queen(this.destinationCoordiante, this.movedPiece.side);
-		}
+		
+		public final void setPromotionPiece(Piece promotionPiece) {
+			this.promotionPiece = promotionPiece;
+		}		
 	}
 
 	public static final class AttackPromotionMove extends Move {
@@ -171,7 +169,6 @@ public abstract class Move {
 		public void makeMove() {
 			this.attackedPiece.take();
 			ChessBoard.allPieces.remove(this.movedPiece);
-			promotionPiece = this.createNewPiece();
 
 		}
 
@@ -181,10 +178,10 @@ public abstract class Move {
 			ChessBoard.allPieces.add(this.attackedPiece);
 			ChessBoard.allPieces.add(this.movedPiece);
 		}
-
-		private final Piece createNewPiece() {
-			return new Queen(this.destinationCoordiante, this.movedPiece.side);
-		}
+		
+		public final void setPromotionPiece(Piece promotionPiece) {
+			this.promotionPiece = promotionPiece;
+		}	
 
 	}
 }
