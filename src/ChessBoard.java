@@ -37,8 +37,8 @@ public class ChessBoard extends JPanel {
 		this.topFrame = mainFrame;
 		positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq"); // initial position
 //		positionFromFen("4k2r/6r1/8/8/8/8/3R4/R3K3 w Qk");
-		// get the images of the pieces ---------------------------------
 		try {
+			// get the images of the pieces
 			BufferedImage allPictures = ImageIO.read(new File("chess_set_SZB.png"));
 			int index = 0;
 			for (int y = 0; y < 400; y += 200) {
@@ -50,7 +50,7 @@ public class ChessBoard extends JPanel {
 			}
 		} catch (Exception e) {
 			System.err.println("Failed to load the pictures of the pieces");
-		} // -------------------------------------------------------------
+		}
 
 		addMouseListener(new MouseListener() {
 			@Override
@@ -166,51 +166,23 @@ public class ChessBoard extends JPanel {
 	}
 
 	/**
-	 * Set the selected piece possible moves and remove every move that leaves the
-	 * loyal king in check. Also add the castle moves if they are allowed.
-	 * 
-	 * @param selectedPiece
+	 * Restart the game with the initial position
 	 */
-	private void setLegalMoves(Piece selectedPiece) {
-		ArrayList<Move> illegalMoves = new ArrayList<Move>();
-		if (selectedPiece != null) {
-			// check if the possible move is legal
-			this.selectedPieceLegalMoves = selectedPiece.getPossibleMoves();
-			for (Move m : this.selectedPieceLegalMoves) {
-				// make the move
-				m.makeMove();
-				// check if our king is in check
-				if (Piece.isKingInCheck(m.movedPiece.side)) {
-					// add to the illegal moves
-					illegalMoves.add(m);
-				}
-				// reset the move
-				m.resetMove();
-			}
-			for (Move m : illegalMoves) {
-				// remove the illegal moves
-				selectedPieceLegalMoves.remove(m);
-			}
-			if (selectedPiece instanceof King) {
-				// add castle moves (they are already checked)
-				ArrayList<Move> castleMoves = ((King) selectedPiece).getCastleMoves();
-				if (castleMoves != null) {
-					selectedPieceLegalMoves.addAll(castleMoves);
-				}
-			}
-		} else {
-			this.selectedPieceLegalMoves.clear();
-		}
+	public void restartTheGame() {
+		ChessBoard.allPieces.clear();
+		ChessBoard.enPassantSquare = null;
+		this.positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq"); // initial position
+		this.repaint();
 	}
 
 	/**
-	 * Make the move if it is a valid move, also do some checks about the state of
-	 * the game
+	 * Make the move if it is a valid move, check if sides can castle, check if the
+	 * game ended in checkmate or stalemate
 	 * 
 	 * @param selectedPiece the piece of the tried move
 	 * @param newCoordinate the coordinate of the tried move
 	 */
-	public void validateMove(Piece selectedPiece, Point newCoordinate) {
+	private void validateMove(Piece selectedPiece, Point newCoordinate) {
 		Move newMove = null;
 		// get the new move corresponding to the new coordinate
 		for (Move p : this.selectedPieceLegalMoves) {
@@ -238,12 +210,115 @@ public class ChessBoard extends JPanel {
 			newMove.makeMove();
 			this.sideToMove = this.sideToMove.getOppositeSide(); // the next turn
 
-			// TODO check if it is a checkmate or a stalemate
+			// check if it is a checkmate or a stalemate
+			boolean endGame = true;
+			for (Piece p : Piece.getSidePieces(sideToMove)) {
+				if (this.canMove(p)) {
+					endGame = false;
+					break;
+				}
+			}
+			if (endGame) {
+				String text;
+				String title;
+				Color textColor;
+				Color buttonColor;
+				if (Piece.isKingInCheck(this.sideToMove)) {
+					// Game ends with checkmate
+					if (this.sideToMove.isWhite()) {
+						text = "A fehér oldal győzőtt, mert mattot adott az ellenfélnek.";
+						title = "Fehér győzelem!";
+						textColor = Color.BLACK;
+						buttonColor = Color.WHITE;
+					} else {
+						text = "A fekete oldal győzőtt, mert mattot adott az ellenfélnek.";
+						title = "Fekete győzelem!";
+						textColor = Color.WHITE;
+						buttonColor = Color.BLACK;
+					}
+				} else {
+					// Game ends with a draw
+					text = "Döntetlen, mert a " + (this.sideToMove.equals(Alliance.WHITE) ? "fehér" : "fekete")
+							+ " játékos nem tud lépni, de nincs sakkban a királya.";
+					title = "Patt!";
+					textColor = Color.BLACK;
+					buttonColor = new Color(190, 205, 158);
+				}
+				SuperChess.popupDialog(topFrame, text, title, textColor, buttonColor, null);
+				this.restartTheGame();
+			}
+
 		} else {
 			selectedPiece.setRealPosition();
 			System.out.println("The " + selectedPiece + " can't move to " + newCoordinate + ".");
 		}
 		this.selectedPieceLegalMoves.clear();
+	}
+
+	/**
+	 * Set the selected piece possible moves to the board and remove every move that
+	 * leaves the loyal king in check. Also add the castle moves if they are
+	 * allowed.
+	 * 
+	 * @param selectedPiece
+	 */
+	private void setLegalMoves(Piece selectedPiece) {
+		if (selectedPiece != null) {
+			this.selectedPieceLegalMoves = this.getLegalMoves(selectedPiece);
+		} else {
+			this.selectedPieceLegalMoves.clear();
+		}
+	}
+
+	/**
+	 * Get the selected piece possible moves and remove every move that leaves the
+	 * loyal king in check. Also add the castle moves if they are allowed.
+	 * 
+	 * @param selectedPiece
+	 */
+	private ArrayList<Move> getLegalMoves(Piece selectedPiece) {
+		ArrayList<Move> illegalMoves = new ArrayList<Move>();
+		ArrayList<Move> legalMoves = new ArrayList<Move>();
+		// check if the possible move is legal
+		legalMoves = selectedPiece.getPossibleMoves();
+		for (Move m : legalMoves) {
+			// make the move
+			m.makeMove();
+			// check if our king is in check
+			if (Piece.isKingInCheck(m.movedPiece.side)) {
+				// add to the illegal moves
+				illegalMoves.add(m);
+			}
+			// reset the move
+			m.resetMove();
+		}
+		for (Move m : illegalMoves) {
+			// remove the illegal moves
+			legalMoves.remove(m);
+		}
+		if (selectedPiece instanceof King) {
+			// add castle moves (they are already checked)
+			ArrayList<Move> castleMoves = ((King) selectedPiece).getCastleMoves();
+			if (castleMoves != null) {
+				legalMoves.addAll(castleMoves);
+			}
+		}
+		return legalMoves;
+	}
+
+	/**
+	 * Check if the given piece can move
+	 * 
+	 * @param selectedPiece
+	 * @return true if the piece can move, false otherwise
+	 */
+	private boolean canMove(Piece selectedPiece) {
+		ArrayList<Move> legalMoves = this.getLegalMoves(selectedPiece);
+		if (legalMoves.size() < 1) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	/**
@@ -298,7 +373,7 @@ public class ChessBoard extends JPanel {
 				if (Character.isDigit(c)) {
 					file += Character.digit(c, 10);
 				} else {
-					createNewPiece(new Point(file, rank), c);
+					this.createNewPiece(new Point(file, rank), c);
 					file++;
 				}
 			}
@@ -309,50 +384,7 @@ public class ChessBoard extends JPanel {
 		whiteCanShortCastle = state.contains("K");
 		whiteCanLongCastle = state.contains("Q");
 		blackCanShortCastle = state.contains("k");
-		blackCanLongCastle = state.contains("Q");
-	}
-
-	/**
-	 * Crate a new piece at the given coordinate
-	 * 
-	 * @param coordinate coordinate of the new piece
-	 * @param pieceType  type of the piece
-	 */
-	public static void createNewPiece(Point coordinate, char pieceType) {
-		final Alliance side;
-		if (Character.isUpperCase(pieceType)) {
-			side = Alliance.WHITE;
-		} else {
-			side = Alliance.BLACK;
-		}
-
-		switch (String.valueOf(pieceType).toLowerCase()) {
-		case "p":
-			new Pawn(coordinate, side);
-			break;
-		case "r":
-			new Rook(coordinate, side);
-			break;
-		case "n":
-			new Knight(coordinate, side);
-			break;
-		case "b":
-			new Bishop(coordinate, side);
-			break;
-		case "q":
-			new Queen(coordinate, side);
-			break;
-		case "k":
-			new King(coordinate, side);
-			break;
-		}
-	}
-
-	public void restartTheGame() {
-		ChessBoard.allPieces.clear();
-		ChessBoard.enPassantSquare = null;
-		this.positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq"); // initial position
-		this.repaint();
+		blackCanLongCastle = state.contains("q");
 	}
 
 	/**
@@ -401,6 +433,42 @@ public class ChessBoard extends JPanel {
 
 		if (promotionMove instanceof Move.AttackPromotionMove) {
 			((Move.AttackPromotionMove) promotionMove).setPromotionPiece(promotionPiece);
+		}
+	}
+
+	/**
+	 * Crate a new piece at the given coordinate
+	 * 
+	 * @param coordinate coordinate of the new piece
+	 * @param pieceType  type of the piece
+	 */
+	private void createNewPiece(Point coordinate, char pieceType) {
+		final Alliance side;
+		if (Character.isUpperCase(pieceType)) {
+			side = Alliance.WHITE;
+		} else {
+			side = Alliance.BLACK;
+		}
+
+		switch (String.valueOf(pieceType).toLowerCase()) {
+		case "p":
+			new Pawn(coordinate, side);
+			break;
+		case "r":
+			new Rook(coordinate, side);
+			break;
+		case "n":
+			new Knight(coordinate, side);
+			break;
+		case "b":
+			new Bishop(coordinate, side);
+			break;
+		case "q":
+			new Queen(coordinate, side);
+			break;
+		case "k":
+			new King(coordinate, side);
+			break;
 		}
 	}
 }

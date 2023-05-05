@@ -4,7 +4,6 @@ public abstract class Move {
 	final Piece movedPiece;
 	final Point startCoordinate;
 	final Point destinationCoordiante;
-	boolean isValid;
 
 	private Move(final Piece movedPiece, final Point startCoordinate, final Point destinationCoordinate) {
 		this.movedPiece = movedPiece;

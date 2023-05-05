@@ -108,7 +108,7 @@ public class SuperChess {
 	}
 
 	/**
-	 * Make a popup window to the user to interact with is *
+	 * Make a popup window to the user to interact with it
 	 * 
 	 * @param mainframe   parent window
 	 * @param text        information about the window

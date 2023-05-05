@@ -21,12 +21,15 @@ public abstract class Piece {
 	}
 
 	/**
-	 * Calculate the piece possible moves without validating them
+	 * Calculate the piece pseudo legal moves without validating them *
 	 * 
 	 * @return
 	 */
 	public abstract ArrayList<Move> getPossibleMoves();
 
+	/**
+	 * Remove the piece from the board
+	 */
 	public void take() {
 		ChessBoard.allPieces.remove(this);
 	}
@@ -98,19 +101,19 @@ public abstract class Piece {
 	}
 
 	/**
-	 * Get the pieces of the opponent of the given side from the list of pieces
+	 * Get the pieces of the given side from the list of pieces
 	 * 
 	 * @param side
-	 * @return pieces of the opponent
+	 * @return pieces of the given side
 	 */
-	public static ArrayList<Piece> getOppositePieces(Alliance side) {
-		ArrayList<Piece> oppositePieces = new ArrayList<Piece>();
+	public static ArrayList<Piece> getSidePieces(Alliance side) {
+		ArrayList<Piece> sidePieces = new ArrayList<Piece>();
 		for (Piece p : ChessBoard.allPieces) {
-			if (!p.side.equals(side)) {
-				oppositePieces.add(p);
+			if (p.side.equals(side)) {
+				sidePieces.add(p);
 			}
 		}
-		return oppositePieces;
+		return sidePieces;
 	}
 
 	/**
@@ -135,7 +138,7 @@ public abstract class Piece {
 	 * @return true if the coordinate is in check, false otherwise
 	 */
 	public static boolean isCoordinateInCheck(Alliance side, Point coordinate) {
-		ArrayList<Piece> oppositePieces = Piece.getOppositePieces(side);
+		ArrayList<Piece> oppositePieces = Piece.getSidePieces(side.getOppositeSide());
 		for (Piece p : oppositePieces) {
 			if (Piece.containsCoordinate(p.getPossibleMoves(), coordinate)) {
 				return true;
