@@ -225,7 +225,7 @@ public class ChessBoard extends JPanel {
 				Color buttonColor;
 				if (Piece.isKingInCheck(this.sideToMove)) {
 					// Game ends with checkmate
-					if (this.sideToMove.isWhite()) {
+					if (this.sideToMove.isBlack()) {
 						text = "A fehér oldal győzőtt, mert mattot adott az ellenfélnek.";
 						title = "Fehér győzelem!";
 						textColor = Color.BLACK;
